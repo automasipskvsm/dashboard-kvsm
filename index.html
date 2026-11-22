@@ -4,26 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Prestasi Pencapaian Blueprint Strategik KVSM (2026 - 2028)</title>
-    
-    <!-- Framework & Utility Libraries -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%232563eb%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 font-weight=%22bold%22 text-anchor=%22middle%22 fill=%22white%22>KV</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-        }
-
+        body { font-family: 'Inter', sans-serif; }
         #print-staging-root {
             display: none;
         }
-
-        /* Rekabentuk Khas Untuk Cetakan / Ekspor PDF */
         @media print {
-            @page { margin: 8mm; size: A4 portrait; }
+            @page { margin: 10mm; }
             body {
                 background: #ffffff !important;
                 -webkit-print-color-adjust: exact;
@@ -32,8 +25,7 @@
             body.print-clean-mode > header,
             body.print-clean-mode > main,
             body.print-clean-mode > footer,
-            body.print-clean-mode > #print-modal,
-            body.print-clean-mode > #toast-container {
+            body.print-clean-mode > #print-modal {
                 display: none !important;
             }
             body.print-clean-mode > #print-staging-root {
@@ -116,102 +108,68 @@
                 page-break-inside: avoid;
             }
         }
-
-        /* Penyesuaian Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-50 text-slate-800 antialiased">
 
-    <!-- Bekas Notifikasi Toast Custom -->
-    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none no-print"></div>
-
-    <!-- Pengepala Utama & Kawalan Live Sync -->
+    <!-- Pengepala Utama -->
     <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30 border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col lg:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <div class="px-3.5 py-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-extrabold text-lg tracking-wider shadow-inner shrink-0 border border-blue-400/30">
+                <div class="px-4 h-11 rounded-xl bg-blue-600 flex items-center justify-center font-extrabold text-lg tracking-wide shadow-inner shrink-0">
                     KVSM
                 </div>
                 <div>
-                    <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white leading-tight">
-                        DASHBOARD PRESTASI PENCAPAIAN BLUEPRINT STRATEGIK KVSM
-                    </h1>
-                    <p class="text-slate-400 text-xs sm:text-sm flex items-center gap-2">
-                        <span>Pemantauan KPI (2026–2028)</span>
-                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                    </p>
+                    <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white">DASHBOARD PRESTASI PENCAPAIAN BLUEPRINT STRATEGIK KVSM</h1>
+                    <p class="text-slate-400 text-xs sm:text-sm">Pemantauan KPI (2026–2028)</p>
                 </div>
             </div>
 
-            <!-- Kawalan Tahun, Mod Sumber Data, Auto-Sync & Cetakan -->
-            <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 no-print">
-                <!-- Pemilih Tahun -->
-                <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700 shadow-sm">
-                    <span class="text-[11px] font-bold uppercase tracking-wider px-2 text-slate-400">Tahun:</span>
-                    <button id="btn-2026" onclick="switchYear('2026')" class="year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-blue-600 text-white shadow transition-all">2026</button>
-                    <button id="btn-2027" onclick="switchYear('2027')" class="year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-700 transition-all">2027</button>
-                    <button id="btn-2028" onclick="switchYear('2028')" class="year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-700 transition-all">2028</button>
+            <!-- Kawalan Tahun, Mod Sumber Data & Cetak Terpilih -->
+            <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 no-print">
+                <div class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
+                    <span class="text-xs font-semibold uppercase tracking-wider px-2 text-slate-400">Tahun:</span>
+                    <button id="btn-2026" onclick="switchYear('2026')" class="year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-blue-600 text-white shadow transition">2026</button>
+                    <button id="btn-2027" onclick="switchYear('2027')" class="year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-700 transition">2027</button>
+                    <button id="btn-2028" onclick="switchYear('2028')" class="year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-700 transition">2028</button>
                 </div>
 
-                <!-- Mod Sumber Data -->
-                <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700 shadow-sm">
-                    <button id="mode-live" onclick="setDataMode('live')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs bg-emerald-600 text-white shadow transition-all flex items-center gap-1" title="Tarik data terkini dari Google Sheets terbitan">
-                        <span>🌐</span> Live Sheet
-                    </button>
-                    <button id="mode-master" onclick="setDataMode('master')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1" title="Guna data master terbina dalam (57 KPI / tahun)">
-                        <span>📦</span> Data Master
-                    </button>
+                <div class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
+                    <button id="mode-live" onclick="setDataMode('live')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs bg-emerald-600 text-white shadow transition" title="Cuba tarik CSV langsung dari Google Sheets">🌐 Live Sheet</button>
+                    <button id="mode-master" onclick="setDataMode('master')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs text-slate-300 hover:text-white transition" title="Guna data master terbina dalam (57 KPI / tahun)">📦 Data Master</button>
                 </div>
 
-                <!-- Suis Auto-Sync & Pemasa Pasif -->
-                <button id="auto-sync-toggle" onclick="toggleAutoSync()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 text-xs font-semibold px-2.5 py-2 rounded-xl transition flex items-center gap-1.5" title="Klik untuk mengaktifkan / menjeda kemas kini automatik berkala">
-                    <span id="auto-sync-icon" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="auto-sync-label">Auto Live (60s)</span>
+                <button id="sync-btn" onclick="syncCurrentYear()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+                    <span id="sync-icon">🔄</span> <span>Segerak</span>
                 </button>
 
-                <!-- Butang Manual Sync -->
-                <button id="sync-btn" onclick="syncCurrentYear(true)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5 active:scale-95" title="Muat semula data dari Google Sheet sekarang">
-                    <span id="sync-icon">🔄</span>
-                    <span class="hidden sm:inline">Segerak</span>
-                </button>
-
-                <!-- Butang Cetak / PDF -->
-                <button onclick="openPrintModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5 active:scale-95">
-                    <span>🖨️</span>
-                    <span>Cetak / PDF</span>
+                <button onclick="openPrintModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+                    <span>🖨️</span> <span>Cetak / PDF</span>
                 </button>
             </div>
         </div>
 
-        <!-- Jalur Status & Penapis Aktif -->
-        <div class="bg-slate-950/80 backdrop-blur px-4 sm:px-6 py-2 text-xs text-slate-300 flex flex-wrap justify-between items-center gap-2 max-w-7xl mx-auto border-t border-slate-800/60">
-            <div class="flex items-center gap-2">
-                <span id="sync-status-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-                <span id="sync-status-text" class="font-medium">📦 Memaparkan Data Master Tahun 2026 (57 KPI)</span>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <span id="auto-refresh-countdown" class="text-[11px] font-mono text-slate-400 hidden sm:inline">Kemas kini seterusnya: <strong id="timer-seconds" class="text-blue-400">60s</strong></span>
-                <span id="active-filter-badge" class="hidden bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-medium cursor-pointer hover:bg-amber-500/30 transition" onclick="resetAllFilters()">
-                    Penapis Aktif: <span id="active-filter-label"></span> ✕
-                </span>
-            </div>
+        <div class="bg-slate-950/70 px-4 sm:px-6 py-1.5 text-xs text-slate-300 flex flex-wrap justify-between items-center gap-2 max-w-7xl mx-auto">
+            <span id="sync-status-text">📦 Memaparkan Data Master Tahun 2026 (57 KPI)</span>
+            <span id="active-filter-badge" class="hidden bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-medium cursor-pointer" onclick="resetAllFilters()">
+                Penapis Aktif: <span id="active-filter-label"></span> ✕
+            </span>
         </div>
     </header>
 
     <!-- Modal Pilihan Bahagian Untuk Dicetak / Eksport PDF -->
-    <div id="print-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden transition-all transform scale-100">
-            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
+    <div id="print-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
                 <div>
                     <h3 class="text-sm font-extrabold uppercase tracking-wide">Pilih Bahagian Untuk Dicetak / Simpan PDF</h3>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Sila tandakan seksyen yang ingin disertakan dalam dokumen anda</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Pilih seksyen yang ingin disertakan dalam cetakan anda</p>
                 </div>
-                <button onclick="closePrintModal()" class="text-slate-400 hover:text-white text-lg font-bold px-2 rounded-lg hover:bg-slate-800 transition">✕</button>
+                <button onclick="closePrintModal()" class="text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
             </div>
 
             <div class="p-6 space-y-4 text-xs">
@@ -222,28 +180,28 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600 rounded" data-target="sec-1" checked>
+                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600" data-target="sec-1" checked>
                         <span class="font-semibold text-slate-800">1. Ringkasan Eksekutif, Perbandingan P1 vs P2 &amp; 5 Kad Status</span>
                     </label>
-                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600 rounded" data-target="sec-2-3" checked>
+                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600" data-target="sec-2-3" checked>
                         <span class="font-semibold text-slate-800">2 &amp; 3. Perbandingan Bidang (P1 vs P2), Jadual &amp; Donut Status</span>
                     </label>
-                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600 rounded" data-target="sec-4" checked>
+                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600" data-target="sec-4" checked>
                         <span class="font-semibold text-slate-800">4. Pecahan Status Mengikut Bidang &amp; Matriks Silang</span>
                     </label>
-                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600 rounded" data-target="sec-alerts" checked>
+                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600" data-target="sec-alerts" checked>
                         <span class="font-semibold text-slate-800">Sorotan Tindakan Segera Pengurusan</span>
                     </label>
-                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600 rounded" data-target="sec-5" checked>
+                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600" data-target="sec-5" checked>
                         <span class="font-semibold text-slate-800">5. Analisis Prestasi &amp; Taburan Mengikut Penyelaras KPI</span>
                     </label>
-                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600 rounded" data-target="detailed-kpi-section" checked>
+                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600" data-target="detailed-kpi-section" checked>
                         <span class="font-semibold text-slate-800">6. Senarai Terperinci KPI (Mengikut Penapis Aktif)</span>
                     </label>
                 </div>
@@ -251,32 +209,27 @@
 
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2.5 text-xs">
                 <button type="button" onclick="closePrintModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition">Batal</button>
-                <button type="button" onclick="runSelectedPrint()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow transition flex items-center gap-1.5">
-                    <span>🖨️</span> Cetak Bahagian Dipilih
-                </button>
+                <button type="button" onclick="runSelectedPrint()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow transition">🖨️ Cetak Bahagian Dipilih</button>
             </div>
         </div>
     </div>
 
-    <!-- Kandungan Utama Dashboard -->
+    <!-- Kandungan Utama -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8">
 
-        <!-- SEKSYEN 1: RINGKASAN EKSEKUTIF & STATUS KESELURUHAN -->
-        <section id="sec-1" class="space-y-4">
+        <!-- SEKSYEN 1 -->
+        <section id="sec-1" class="space-y-4 print-break">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
-                <h2 class="text-base sm:text-lg font-extrabold text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                    <span>1. Ringkasan Eksekutif &amp; Status Pencapaian Keseluruhan (<span id="sec1-total-kpi">57</span> KPI)</span>
+                <h2 class="text-base sm:text-lg font-extrabold text-slate-800 uppercase tracking-tight">
+                    1. Ringkasan Eksekutif &amp; Status Pencapaian Keseluruhan (<span id="sec1-total-kpi">57</span> KPI)
                 </h2>
-                <span class="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full self-start sm:self-auto border border-blue-200">
+                <span class="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full self-start sm:self-auto">
                     Tahun Penilaian: <span id="sec1-year-badge">2026</span>
                 </span>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <!-- Kad Skor Utama -->
-                <div class="lg:col-span-7 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 text-white shadow-md flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="lg:col-span-7 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 text-white shadow-md flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center">
                             <p class="text-xs font-bold tracking-widest text-blue-300 uppercase">Peratus Pencapaian Keseluruhan (Terkini / P2)</p>
@@ -292,17 +245,16 @@
                             Dikira bagi semua kategori kecuali Perlu Pengesahan (Data Belum Direkodkan = 0%)
                         </p>
                     </div>
-                    <div class="w-full bg-slate-800/80 rounded-full h-3 mt-5 overflow-hidden p-0.5 border border-slate-700">
-                        <div id="overall-progress-bar" class="bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400 h-2 rounded-full transition-all duration-700 shadow-sm" style="width: 0%"></div>
+                    <div class="w-full bg-slate-800 rounded-full h-2.5 mt-5 overflow-hidden">
+                        <div id="overall-progress-bar" class="bg-gradient-to-r from-blue-400 to-emerald-400 h-2.5 rounded-full transition-all duration-700" style="width: 0%"></div>
                     </div>
                 </div>
 
-                <!-- Perbandingan Penilaian 1 vs Penilaian 2 -->
                 <div class="lg:col-span-5 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center mb-3">
                             <p class="text-xs font-extrabold tracking-wider text-slate-700 uppercase">Perbandingan Penilaian 1 vs 2</p>
-                            <span id="p1-p2-diff-badge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                            <span id="p1-p2-diff-badge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
                                 Varians: 0.00%
                             </span>
                         </div>
@@ -325,48 +277,48 @@
                 </div>
             </div>
 
-            <!-- 5 Kad Status Interaktif -->
+            <!-- 5 Kad Status -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-                <div onclick="filterByStatus('Melebihi Sasaran')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-500 hover:shadow-md transition group">
+                <div onclick="filterByStatus('Melebihi Sasaran')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-400 hover:shadow transition group">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-600">🟢 Melebihi Sasaran</span>
-                        <span id="pct-melebihi" class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">0.00%</span>
+                        <span id="pct-melebihi" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">0.00%</span>
                     </div>
                     <p id="cnt-melebihi" class="text-3xl font-extrabold text-slate-900 mt-2 group-hover:text-emerald-600 transition">0</p>
                     <p class="text-[11px] text-slate-400 mt-1">&gt; 100% Pencapaian</p>
                 </div>
 
-                <div onclick="filterByStatus('Mencapai Sasaran')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-blue-500 hover:shadow-md transition group">
+                <div onclick="filterByStatus('Mencapai Sasaran')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 hover:shadow transition group">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-600">🔵 Mencapai Sasaran</span>
-                        <span id="pct-mencapai" class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">0.00%</span>
+                        <span id="pct-mencapai" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">0.00%</span>
                     </div>
                     <p id="cnt-mencapai" class="text-3xl font-extrabold text-slate-900 mt-2 group-hover:text-blue-600 transition">0</p>
                     <p class="text-[11px] text-slate-400 mt-1">= 100% Pencapaian</p>
                 </div>
 
-                <div onclick="filterByStatus('Belum Mencapai Sasaran')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-rose-500 hover:shadow-md transition group">
+                <div onclick="filterByStatus('Belum Mencapai Sasaran')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-rose-400 hover:shadow transition group">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-600">🔴 Belum Mencapai</span>
-                        <span id="pct-belum" class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">0.00%</span>
+                        <span id="pct-belum" class="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">0.00%</span>
                     </div>
                     <p id="cnt-belum" class="text-3xl font-extrabold text-slate-900 mt-2 group-hover:text-rose-600 transition">0</p>
                     <p class="text-[11px] text-slate-400 mt-1">&lt; 100% Pencapaian</p>
                 </div>
 
-                <div onclick="filterByStatus('Data Belum Direkodkan')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-slate-500 hover:shadow-md transition group">
+                <div onclick="filterByStatus('Data Belum Direkodkan')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-slate-400 hover:shadow transition group">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-600">🔘 Belum Direkod</span>
-                        <span id="pct-tiada" class="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">0.00%</span>
+                        <span id="pct-tiada" class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">0.00%</span>
                     </div>
                     <p id="cnt-tiada" class="text-3xl font-extrabold text-slate-900 mt-2 group-hover:text-slate-600 transition">0</p>
                     <p class="text-[11px] text-slate-400 mt-1">Dikira 0% dalam purata</p>
                 </div>
 
-                <div onclick="filterByStatus('Perlu Pengesahan')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-amber-500 hover:shadow-md transition group">
+                <div onclick="filterByStatus('Perlu Pengesahan')" class="cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-amber-400 hover:shadow transition group">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-600">🟡 Perlu Pengesahan</span>
-                        <span id="pct-sah" class="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">0.00%</span>
+                        <span id="pct-sah" class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">0.00%</span>
                     </div>
                     <p id="cnt-sah" class="text-3xl font-extrabold text-slate-900 mt-2 group-hover:text-amber-600 transition">0</p>
                     <p class="text-[11px] text-slate-400 mt-1">Dikecualikan dari purata</p>
@@ -374,14 +326,13 @@
             </div>
         </section>
 
-        <!-- SEKSYEN 2 & 3: PRESTASI BIDANG & TABURAN DONUT -->
-        <section id="sec-2-3" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Carta Bar & Jadual Bidang -->
+        <!-- SEKSYEN 2 & 3 -->
+        <section id="sec-2-3" class="grid grid-cols-1 lg:grid-cols-12 gap-6 print-break">
             <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-span-7 flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-start mb-1">
                         <h2 class="text-base font-extrabold text-slate-800">2. Perbandingan Pencapaian Penilaian 1 vs 2 Mengikut Bidang</h2>
-                        <span class="text-xs font-semibold text-slate-400">4 Bidang Strategik</span>
+                        <span class="text-xs font-semibold text-slate-400">4 Bidang</span>
                     </div>
                     <p class="text-xs text-slate-500 mb-4">Purata mengikut bidang (termasuk belum direkod = 0%, kecuali Perlu Pengesahan)</p>
                     <div class="h-64">
@@ -409,7 +360,6 @@
                 </div>
             </div>
 
-            <!-- Carta Donut Status Pencapaian -->
             <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-span-5 flex flex-col justify-between">
                 <div>
                     <h2 class="text-base font-extrabold text-slate-800 mb-1">3. Taburan Status Pencapaian (<span id="sec3-total">57</span> KPI)</h2>
@@ -422,8 +372,8 @@
             </div>
         </section>
 
-        <!-- SEKSYEN 4: PECAHAN KUMPULAN & MATRIKS SILANG -->
-        <section id="sec-4" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-5">
+        <!-- SEKSYEN 4 -->
+        <section id="sec-4" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-5 print-break">
             <div>
                 <h2 class="text-base font-extrabold text-slate-800">4. Pecahan Bilangan KPI Mengikut Status &amp; Bidang</h2>
                 <p class="text-xs text-slate-500">Perbandingan taburan status pencapaian merentasi keempat-empat sektor</p>
@@ -434,9 +384,9 @@
             </div>
 
             <div class="pt-3 border-t border-slate-100">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 mb-2">
+                <div class="flex justify-between items-center mb-2">
                     <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Matriks Silang: Bilangan KPI Mengikut Status Pencapaian &amp; Bidang</h3>
-                    <span class="text-[11px] text-blue-600 font-medium no-print">Klik mana-mana sel nombor untuk menapis senarai KPI terperinci</span>
+                    <span class="text-[11px] text-blue-600 font-medium no-print">Klik mana-mana sel nombor untuk menapis senarai KPI di bawah</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs border-collapse border border-slate-200">
@@ -457,42 +407,38 @@
             </div>
         </section>
 
-        <!-- SEKSYEN SOROTAN TINDAKAN SEGERA PENGURUSAN -->
-        <section id="sec-alerts" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+        <!-- SOROTAN PENGURUSAN -->
+        <section id="sec-alerts" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4 print-break">
             <div class="border-b border-slate-100 pb-2">
-                <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                    <span>⚡ Sorotan Tindakan Segera Pengurusan (Fokus Mesyuarat Blueprint)</span>
-                </h2>
+                <h2 class="text-base font-extrabold text-slate-800">Sorotan Tindakan Segera Pengurusan (Fokus Mesyuarat Blueprint)</h2>
                 <p class="text-xs text-slate-500">Ringkasan automatik KPI kritikal di bawah sasaran &amp; rekod belum dikemas kini</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Senarai Belum Mencapai -->
                 <div class="bg-rose-50/50 border border-rose-200 rounded-xl p-4">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xs font-extrabold text-rose-800 uppercase flex items-center gap-1.5">
                             🔴 <span id="alert-below-count">0</span> KPI Belum Mencapai Sasaran (&lt;100%)
                         </h3>
-                        <span class="text-[11px] font-semibold bg-rose-100 text-rose-700 px-2 py-0.5 rounded border border-rose-200">Intervensi Diperlukan</span>
+                        <span class="text-[11px] font-semibold bg-rose-100 text-rose-700 px-2 py-0.5 rounded">Intervensi Diperlukan</span>
                     </div>
                     <div id="alert-below-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs"></div>
                 </div>
 
-                <!-- Senarai Belum Direkodkan Mengikut Penyelaras -->
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xs font-extrabold text-slate-700 uppercase flex items-center gap-1.5">
                             🔘 <span id="alert-unrecorded-count">0</span> KPI Data Belum Direkodkan (0%)
                         </h3>
-                        <span class="text-[11px] font-semibold bg-slate-200 text-slate-700 px-2 py-0.5 rounded border border-slate-300">Susulan Penyelaras</span>
+                        <span class="text-[11px] font-semibold bg-slate-200 text-slate-700 px-2 py-0.5 rounded">Susulan Penyelaras</span>
                     </div>
                     <div id="alert-unrecorded-list" class="space-y-2.5 max-h-64 overflow-y-auto pr-1 text-xs"></div>
                 </div>
             </div>
         </section>
 
-        <!-- SEKSYEN 5: ANALISIS PENYELARAS KPI -->
-        <section id="sec-5" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+        <!-- SEKSYEN 5 -->
+        <section id="sec-5" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6 print-break">
             <div>
                 <h2 class="text-base font-extrabold text-slate-800">5. Analisis Prestasi &amp; Taburan Status Mengikut Penyelaras KPI</h2>
                 <p class="text-xs text-slate-500">Susunan purata pencapaian (termasuk belum direkod = 0%, kecuali Perlu Pengesahan)</p>
@@ -516,7 +462,7 @@
             <div class="pt-4 border-t border-slate-100">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Jadual Analisis Lengkap Mengikut Penyelaras KPI (<span id="coord-total-count">0</span> Penyelaras)</h3>
-                    <span class="text-[11px] text-blue-600 font-medium no-print">Klik nama penyelaras untuk menapis senarai KPI</span>
+                    <span class="text-[11px] text-blue-600 font-medium no-print">Klik nama penyelaras untuk menapis senarai penuh KPI di bawah</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs border-collapse border border-slate-200">
@@ -541,7 +487,7 @@
             </div>
         </section>
 
-        <!-- SEKSYEN 6: SENARAI TERPERINCI KPI & KAWALAN PENAPIS -->
+        <!-- SEKSYEN 6 -->
         <section id="detailed-kpi-section" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-5 sm:p-6 border-b border-slate-200 space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -549,12 +495,11 @@
                         <h2 class="text-base font-extrabold text-slate-800">6. Senarai Terperinci KPI Mengikut Kategori Status Pencapaian</h2>
                         <p class="text-xs text-slate-500">Lengkap dengan perbandingan Penilaian 1, Penilaian 2, dan varians perubahan prestasi</p>
                     </div>
-                    <span class="text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 self-start md:self-auto">
+                    <span class="text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg self-start md:self-auto">
                         Memaparkan <span id="showing-count" class="text-blue-700">0</span> daripada <span id="total-records-count">0</span> KPI
                     </span>
                 </div>
 
-                <!-- Kawalan Penapis Berbilang -->
                 <div class="flex flex-col lg:flex-row justify-between gap-3 no-print">
                     <div class="flex flex-wrap gap-1.5" id="status-filter-tabs">
                         <button onclick="setTabStatus('ALL')" data-status="ALL" class="status-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">Semua</button>
@@ -566,18 +511,17 @@
                     </div>
 
                     <div class="flex flex-wrap sm:flex-nowrap gap-2">
-                        <select id="domainSelectFilter" onchange="applyAllFilters()" class="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="domainSelectFilter" onchange="applyAllFilters()" class="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-white">
                             <option value="ALL">Semua Bidang</option>
                         </select>
-                        <select id="coordSelectFilter" onchange="applyAllFilters()" class="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="coordSelectFilter" onchange="applyAllFilters()" class="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-white">
                             <option value="ALL">Semua Penyelaras</option>
                         </select>
-                        <input type="text" id="searchInput" onkeyup="applyAllFilters()" placeholder="Cari Kod KPI / Pernyataan..." class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-56 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="searchInput" onkeyup="applyAllFilters()" placeholder="Cari Kod KPI / Pernyataan..." class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full sm:w-56">
                     </div>
                 </div>
             </div>
 
-            <!-- Jadual Penuh KPI -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -602,95 +546,17 @@
         </section>
     </main>
 
-    <!-- Bekas Staging Cetakan Halaman -->
     <div id="print-staging-root" aria-hidden="true"></div>
 
     <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-6 text-center text-xs text-slate-400 border-t border-slate-200 mt-8">
-        Dashboard Pemantauan Prestasi Blueprint Strategik KVSM (2026–2028) &bull; Sistem Penyegeraan Data Otomatik Terbina Dalam
+        Dashboard Pemantauan Prestasi Blueprint Strategik KVSM (2026–2028)
     </footer>
 
-    <!-- SKRIP LOGIK DASHBOARD & AUTO-SYNC -->
     <script>
-        // Mendaftar plugin Chart.js DataLabels
         Chart.register(ChartDataLabels);
 
-        // Data Master Terbina Dalam Untuk Mod Offline / Fallback
-        const EMBEDDED_MASTER_DATA = {
-            "2026": [
-                {"bil": 1, "bidang": "BIDANG 1", "noKpi": "FI-KPI 1", "pernyataan": "Kecukupan staf akademik dalam bidang", "penyelaras": "TPA", "sasaran": "89", "capaiP1": "93", "pctP1Str": "104%", "capaiP2": "93", "pctP2Str": "104%", "numP1": 104.0, "numP2": 104.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 2, "bidang": "BIDANG 1", "noKpi": "F1-KPI 2", "pernyataan": "Kecukupan staf bukan akademik", "penyelaras": "TPA", "sasaran": "19", "capaiP1": "18", "pctP1Str": "95%", "capaiP2": "18", "pctP2Str": "95%", "numP1": 95.0, "numP2": 95.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"},
-                {"bil": 3, "bidang": "BIDANG 1", "noKpi": "F1-KPI 3", "pernyataan": "Pemohonan kenaikan pangkat mengikut kelayakan staf", "penyelaras": "TPA", "sasaran": "19", "capaiP1": "19", "pctP1Str": "100%", "capaiP2": "19", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 4, "bidang": "BIDANG 1", "noKpi": "F2-KPI 4", "pernyataan": "Status prestasi kewangan eSPKWS\nCemerlang: 3\nBaik: 2\nMemuaskan: 1", "penyelaras": "TPA", "sasaran": "3", "capaiP1": "2", "pctP1Str": "67%", "capaiP2": "2", "pctP2Str": "67%", "numP1": 67.0, "numP2": 67.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"},
-                {"bil": 5, "bidang": "BIDANG 1", "noKpi": "F3-KPI 5", "pernyataan": "Peratus pembelian harta modal tahun semasa mengikut keperluan program", "penyelaras": "KJTEE", "sasaran": "100%", "capaiP1": "Tiada Pembelian", "pctP1Str": "", "capaiP2": "Tiada Pembelian", "pctP2Str": "", "numP1": null, "numP2": null, "statusRaw": "🟡 Perlu Pengesahan", "statusCat": "Perlu Pengesahan"},
-                {"bil": 6, "bidang": "BIDANG 1", "noKpi": "F3-KPI 6", "pernyataan": "Peratus penyelenggaraan aset berdasarkan peruntukan yang diperolehi", "penyelaras": "Pegawai Aset", "sasaran": "4", "capaiP1": "4", "pctP1Str": "100%", "capaiP2": "4", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 7, "bidang": "BIDANG 1", "noKpi": "F4-KPI 7", "pernyataan": "Bilangan program sokongan untuk AKP", "penyelaras": "KJPro", "sasaran": "2", "capaiP1": "2", "pctP1Str": "100%", "capaiP2": "3", "pctP2Str": "150%", "numP1": 100.0, "numP2": 150.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 8, "bidang": "BIDANG 2", "noKpi": "F5-KPI 8", "pernyataan": "PEO 1: Peratus graduan mempamerkan pengetahuan, pemahaman dan kemahiran kognitif dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "80%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "80%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 9, "bidang": "BIDANG 2", "noKpi": "F5-KPI 9", "pernyataan": "PEO 2: Peratus graduan menunjukkan kecakapan kerja dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "70%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "70%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 10, "bidang": "BIDANG 2", "noKpi": "F5-KPI 10", "pernyataan": "PEO 3: Peratus graduan menunjukkan kemahiran personal dan kemahiran keusahawanan dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "10%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "10%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 11, "bidang": "BIDANG 2", "noKpi": "F5-KPI 11", "pernyataan": "PEO 4: Peratus graduan mempamerkan etika dan profesionalisme, kepimpinan, autonomi dan tanggungjawab dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "90%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "90%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 12, "bidang": "BIDANG 2", "noKpi": "F6-KPI 12", "pernyataan": "PEO 1: Peratus graduan mempamerkan pengetahuan, pemahaman dan kemahiran kognitif dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "80%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 13, "bidang": "BIDANG 2", "noKpi": "F6-KPI 13", "pernyataan": "PEO 2: Peratus graduan menunjukkan kecakapan kerja dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "70%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 14, "bidang": "BIDANG 2", "noKpi": "F6-KPI 14", "pernyataan": "PEO 3: Peratus graduan menunjukkan kemahiran personal dan kemahiran keusahawanan dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "10%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 15, "bidang": "BIDANG 2", "noKpi": "F6-KPI 15", "pernyataan": "PEO 4: Peratus graduan mempamerkan etika dan profesionalisme, kepimpinan, autonomi dan tanggungjawab dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "90%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 16, "bidang": "BIDANG 2", "noKpi": "F7-KPI 16", "pernyataan": "Peratus pelaksanaan MMI mengikut jadual waktu", "penyelaras": "KJTEE & KJPU", "sasaran": "100%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 17, "bidang": "BIDANG 2", "noKpi": "F7-KPI 17", "pernyataan": "Bilangan bengkel pendedahan\r\nWritten Instructional Material (WIM)", "penyelaras": "KJTEE", "sasaran": "1", "capaiP1": "2", "pctP1Str": "200%", "capaiP2": "2", "pctP2Str": "200%", "numP1": 200.0, "numP2": 200.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 18, "bidang": "BIDANG 2", "noKpi": "F7-KPI 18", "pernyataan": "Bilangan program pemantapan digital di kalangan pensyarah", "penyelaras": "KJPro", "sasaran": "2", "capaiP1": "2", "pctP1Str": "100%", "capaiP2": "3", "pctP2Str": "150%", "numP1": 100.0, "numP2": 150.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 19, "bidang": "BIDANG 2", "noKpi": "F7-KPI 19", "pernyataan": "Peratus pensyarah melebihi 90% dalam pencerapan PdP", "penyelaras": "KJPro", "sasaran": "100%", "capaiP1": "73%", "pctP1Str": "73%", "capaiP2": "73%", "pctP2Str": "73%", "numP1": 73.0, "numP2": 73.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"},
-                {"bil": 20, "bidang": "BIDANG 2", "noKpi": "F8-KPI 20", "pernyataan": "Bilangan program pemantapan 4P", "penyelaras": "KJPP", "sasaran": "2", "capaiP1": "2", "pctP1Str": "100%", "capaiP2": "4", "pctP2Str": "200%", "numP1": 100.0, "numP2": 200.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 21, "bidang": "BIDANG 2", "noKpi": "F9-KPI 21", "pernyataan": "Peratus pematuhan Prosedur Pengurusan Pentaksiran dan Penilaian mengikut standard pengurusan kualiti", "penyelaras": "KJPP", "sasaran": "100%", "capaiP1": "100%", "pctP1Str": "100%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 22, "bidang": "BIDANG 2", "noKpi": "F10-KPI 22", "pernyataan": "Peratus pelajar lulus SVM (K2024)", "penyelaras": "KJTEE & KJPU", "sasaran": "98%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "99.3%", "pctP2Str": "101%", "numP1": 0.0, "numP2": 101.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 23, "bidang": "BIDANG 2", "noKpi": "F10-KPI 23", "pernyataan": "Peratus pelajar SVM layak ke program DVM (K2024)", "penyelaras": "KJTEE & KJPU", "sasaran": "98%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "100%", "pctP2Str": "102%", "numP1": 0.0, "numP2": 102.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 24, "bidang": "BIDANG 2", "noKpi": "F10-KPI 24", "pernyataan": "Peratus pelajar memperoleh SKM Tahap 3 (K2024)", "penyelaras": "KJTEE", "sasaran": "100%", "capaiP1": "100%", "pctP1Str": "100%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 25, "bidang": "BIDANG 2", "noKpi": "F11-KPI 25", "pernyataan": "Peratus pelajar DVM bergraduat (A2023)", "penyelaras": "KJTEE & KJPU", "sasaran": "100%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 26, "bidang": "BIDANG 2", "noKpi": "F12-KPI 26", "pernyataan": "Bilangan pensyarah terlibat LSI bagi setiap program (2 Elektrik & 2 Elektronik)", "penyelaras": "KJPro", "sasaran": "4", "capaiP1": "4", "pctP1Str": "100%", "capaiP2": "4", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 27, "bidang": "BIDANG 2", "noKpi": "F13-KPI 27", "pernyataan": "Peratus pensyarah vokasional mempunyai sekurang-kurangnya SKM Tahap 3", "penyelaras": "KJTEE", "sasaran": "90%", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "74.5%", "pctP2Str": "83%", "numP1": 0.0, "numP2": 83.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"},
-                {"bil": 28, "bidang": "BIDANG 2", "noKpi": "F13-KPI 28", "pernyataan": "Peratus pensyarah vokasional mempunyai TVET-i", "penyelaras": "KJTEE", "sasaran": "90%", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "69%", "pctP2Str": "77%", "numP1": 0.0, "numP2": 77.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"},
-                {"bil": 29, "bidang": "BIDANG 2", "noKpi": "F13-KPI 29", "pernyataan": "Bilangan pensyarah vokasional mendaftar GT.", "penyelaras": "KJTEE", "sasaran": "100%", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "96%", "pctP2Str": "96%", "numP1": 0.0, "numP2": 96.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"},
-                {"bil": 30, "bidang": "BIDANG 2", "noKpi": "F13-KPI 30", "pernyataan": "Bilangan pensyarah vokasional mendapat gelaran Ts.", "penyelaras": "KJTEE", "sasaran": "2", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "3", "pctP2Str": "150%", "numP1": 0.0, "numP2": 150.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 31, "bidang": "BIDANG 2", "noKpi": "F14-KPI 31", "pernyataan": "Bilangan kajian tindakan", "penyelaras": "KJIno", "sasaran": "2", "capaiP1": "3", "pctP1Str": "150%", "capaiP2": "5", "pctP2Str": "250%", "numP1": 150.0, "numP2": 250.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 32, "bidang": "BIDANG 2", "noKpi": "F14-KPI 32", "pernyataan": "Bilangan inovasi dihasilkan (saf akademik)", "penyelaras": "KJIno", "sasaran": "2", "capaiP1": "1", "pctP1Str": "50%", "capaiP2": "3", "pctP2Str": "150%", "numP1": 50.0, "numP2": 150.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 33, "bidang": "BIDANG 2", "noKpi": "F15-KPI 33", "pernyataan": "Bilangan penyertaan inovasi ke peringkat kebangsaan/ antarabangsa (pelajar)", "penyelaras": "KJIno", "sasaran": "10", "capaiP1": "6", "pctP1Str": "60%", "capaiP2": "19", "pctP2Str": "190%", "numP1": 60.0, "numP2": 190.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 34, "bidang": "BIDANG 3", "noKpi": "F16-KPI 34", "pernyataan": "Peratus pelajar mendaftar (K2026)", "penyelaras": "KJHEP", "sasaran": "100%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 35, "bidang": "BIDANG 3", "noKpi": "F17-KPI 35", "pernyataan": "Peratus kehadiran pelajar", "penyelaras": "KJHEP", "sasaran": "96%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 36, "bidang": "BIDANG 3", "noKpi": "F18-KPI 36", "pernyataan": "Analisa peratus tahap kepuasan pelanggan terhadap khidmat sokongan pelajar (Skala 3-4)", "penyelaras": "KJHEP", "sasaran": "85%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 37, "bidang": "BIDANG 3", "noKpi": "F18-KPI 37", "pernyataan": "Bilangan program kokurikulum dianjurkan", "penyelaras": "KJHEP", "sasaran": "8", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 38, "bidang": "BIDANG 3", "noKpi": "F18-KPI 38", "pernyataan": "Bilangan program dijalankan oleh MPP", "penyelaras": "KJHEP", "sasaran": "6", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 39, "bidang": "BIDANG 3", "noKpi": "F18-KPI 39", "pernyataan": "Peratus penerima biasiswa/ bantuan daripada pelajar yang memohon", "penyelaras": "KJHEP", "sasaran": "50%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 40, "bidang": "BIDANG 3", "noKpi": "F19-KPI 40", "pernyataan": "Bilangan program melibatkan komuniti setempat/ PIBG/ alumni", "penyelaras": "KJHEP", "sasaran": "4", "capaiP1": "1", "pctP1Str": "25%", "capaiP2": "2", "pctP2Str": "50%", "numP1": 25.0, "numP2": 50.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"},
-                {"bil": 41, "bidang": "BIDANG 3", "noKpi": "F20-KPI 41", "pernyataan": "Peratus koleksi e-book di PS", "penyelaras": "KJCorp", "sasaran": "80%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "90%", "pctP2Str": "113%", "numP1": 0.0, "numP2": 113.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 42, "bidang": "BIDANG 3", "noKpi": "F20-KPI 42", "pernyataan": "Penarafan bintang asrama kondusif", "penyelaras": "KJHEP", "sasaran": "4", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 43, "bidang": "BIDANG 3", "noKpi": "F21-KPI 43", "pernyataan": "Bilangan program bersama institusi TVET/ industri yang terlibat MoU/ NoU", "penyelaras": "KJHIA", "sasaran": "3", "capaiP1": "5", "pctP1Str": "167%", "capaiP2": "7", "pctP2Str": "233%", "numP1": 167.0, "numP2": 233.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 44, "bidang": "BIDANG 3", "noKpi": "F21-KPI 44", "pernyataan": "Bilangan lawatan penanda aras/ lawatan industri", "penyelaras": "KJCorp", "sasaran": "3", "capaiP1": "2", "pctP1Str": "67%", "capaiP2": "4", "pctP2Str": "133%", "numP1": 67.0, "numP2": 133.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 45, "bidang": "BIDANG 3", "noKpi": "F22-KPI 45", "pernyataan": "Peratus kebolehpasaran graduan (A2023)", "penyelaras": "KJHEP", "sasaran": "100%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 46, "bidang": "BIDANG 3", "noKpi": "F22-KPI 46", "pernyataan": "Peratus graduan bekerja dalam bidang (A2023)", "penyelaras": "KJHEP", "sasaran": "70%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 47, "bidang": "BIDANG 3", "noKpi": "F22-KPI 47", "pernyataan": "Peratus graduan menyambung pengajian (A2023)", "penyelaras": "KJHEP", "sasaran": "20%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 48, "bidang": "BIDANG 3", "noKpi": "F22-KPI 48", "pernyataan": "Peratus graduan terlibat keusahawanan (A2023)", "penyelaras": "KJHEP", "sasaran": "10%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"},
-                {"bil": 49, "bidang": "BIDANG 4", "noKpi": "F23-KPI 49", "pernyataan": "Peratus pensyarah melebihi 90% dalam PBPPP", "penyelaras": "KJK", "sasaran": "92%", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "100%", "pctP2Str": "109%", "numP1": 0.0, "numP2": 109.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"},
-                {"bil": 50, "bidang": "BIDANG 4", "noKpi": "F23-KPI 50", "pernyataan": "Peratus AKP melebihi 90% dalam MyPerformance", "penyelaras": "KJK", "sasaran": "90%", "capaiP1": "50%", "pctP1Str": "56%", "capaiP2": "100%\nAKP siap", "pctP2Str": "", "numP1": null, "numP2": null, "statusRaw": "🟡 Perlu Pengesahan", "statusCat": "Perlu Pengesahan"},
-                {"bil": 51, "bidang": "BIDANG 4", "noKpi": "F24-KPI 51", "pernyataan": "Bilangan zon melepasi 80% dalam audit dalaman EKSA", "penyelaras": "KU Persijilan Profesional & Penarafan Program", "sasaran": "6", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "5", "pctP2Str": "83%", "numP1": 0.0, "numP2": 83.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"},
-                {"bil": 52, "bidang": "BIDANG 4", "noKpi": "F24-KPI 52", "pernyataan": "Bilangan zon melepasi 80% dalam audit dalaman OSH", "penyelaras": "KU Persijilan Profesional & Penarafan Program", "sasaran": "6", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "6", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 53, "bidang": "BIDANG 4", "noKpi": "F25-KPI 53", "pernyataan": "Kelulusan akreditasi MQA", "penyelaras": "KU Akreditasi DVM", "sasaran": "1", "capaiP1": "1", "pctP1Str": "100%", "capaiP2": "1", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 54, "bidang": "BIDANG 4", "noKpi": "F25-KPI 54", "pernyataan": "Kelulusan akreditasi MBOT", "penyelaras": "KU Akreditasi DVM", "sasaran": "6", "capaiP1": "6", "pctP1Str": "100%", "capaiP2": "6", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 55, "bidang": "BIDANG 4", "noKpi": "F25-KPI 55", "pernyataan": "Kelulusan akreditasi JPK (Pusat bertauliah) / COPTPA", "penyelaras": "KU Persijilan SVM & SKM", "sasaran": "2", "capaiP1": "2", "pctP1Str": "100%", "capaiP2": "2", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 56, "bidang": "BIDANG 4", "noKpi": "F26-KPI 56", "pernyataan": "Peratus pematuhan Standard Prosedur Kualiti (SPK) KVKPM 2.0", "penyelaras": "KU Pengurusan Kualiti", "sasaran": "100%", "capaiP1": "33%", "pctP1Str": "33%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 33.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"},
-                {"bil": 57, "bidang": "BIDANG 4", "noKpi": "F26-KPI 57", "pernyataan": "Bilangan program penambahbaikan berterusan melibatkan TAC, Penilai Luar dan alumni", "penyelaras": "KJK", "sasaran": "2", "capaiP1": "1", "pctP1Str": "50%", "capaiP2": "2", "pctP2Str": "100%", "numP1": 50.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}
-            ],
-            "2027": [],
-            "2028": []
-        };
+        const EMBEDDED_MASTER_DATA = {"2026": [{"bil": 1, "bidang": "BIDANG 1", "noKpi": "FI-KPI 1", "pernyataan": "Kecukupan staf akademik dalam bidang", "penyelaras": "TPA", "sasaran": "89", "capaiP1": "93", "pctP1Str": "104%", "capaiP2": "93", "pctP2Str": "104%", "numP1": 104.0, "numP2": 104.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 2, "bidang": "BIDANG 1", "noKpi": "F1-KPI 2", "pernyataan": "Kecukupan staf bukan akademik", "penyelaras": "TPA", "sasaran": "19", "capaiP1": "18", "pctP1Str": "95%", "capaiP2": "18", "pctP2Str": "95%", "numP1": 95.0, "numP2": 95.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"}, {"bil": 3, "bidang": "BIDANG 1", "noKpi": "F1-KPI 3", "pernyataan": "Pemohonan kenaikan pangkat mengikut kelayakan staf", "penyelaras": "TPA", "sasaran": "19", "capaiP1": "19", "pctP1Str": "100%", "capaiP2": "19", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 4, "bidang": "BIDANG 1", "noKpi": "F2-KPI 4", "pernyataan": "Status prestasi kewangan eSPKWS\nCemerlang: 3\nBaik: 2\nMemuaskan: 1", "penyelaras": "TPA", "sasaran": "3", "capaiP1": "2", "pctP1Str": "67%", "capaiP2": "2", "pctP2Str": "67%", "numP1": 67.0, "numP2": 67.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"}, {"bil": 5, "bidang": "BIDANG 1", "noKpi": "F3-KPI 5", "pernyataan": "Peratus pembelian harta modal tahun semasa mengikut keperluan program", "penyelaras": "KJTEE", "sasaran": "100%", "capaiP1": "Tiada Pembelian", "pctP1Str": "", "capaiP2": "Tiada Pembelian", "pctP2Str": "", "numP1": null, "numP2": null, "statusRaw": "🟡 Perlu Pengesahan", "statusCat": "Perlu Pengesahan"}, {"bil": 6, "bidang": "BIDANG 1", "noKpi": "F3-KPI 6", "pernyataan": "Peratus penyelenggaraan aset berdasarkan peruntukan yang diperolehi", "penyelaras": "Pegawai Aset", "sasaran": "4", "capaiP1": "4", "pctP1Str": "100%", "capaiP2": "4", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 7, "bidang": "BIDANG 1", "noKpi": "F4-KPI 7", "pernyataan": "Bilangan program sokongan untuk AKP", "penyelaras": "KJPro", "sasaran": "2", "capaiP1": "2", "pctP1Str": "100%", "capaiP2": "3", "pctP2Str": "150%", "numP1": 100.0, "numP2": 150.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 8, "bidang": "BIDANG 2", "noKpi": "F5-KPI 8", "pernyataan": "PEO 1: Peratus graduan mempamerkan pengetahuan, pemahaman dan kemahiran kognitif dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "80%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "80%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 9, "bidang": "BIDANG 2", "noKpi": "F5-KPI 9", "pernyataan": "PEO 2: Peratus graduan menunjukkan kecakapan kerja dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "70%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "70%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 10, "bidang": "BIDANG 2", "noKpi": "F5-KPI 10", "pernyataan": "PEO 3: Peratus graduan menunjukkan kemahiran personal dan kemahiran keusahawanan dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "10%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "10%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 11, "bidang": "BIDANG 2", "noKpi": "F5-KPI 11", "pernyataan": "PEO 4: Peratus graduan mempamerkan etika dan profesionalisme, kepimpinan, autonomi dan tanggungjawab dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "90%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "90%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 12, "bidang": "BIDANG 2", "noKpi": "F6-KPI 12", "pernyataan": "PEO 1: Peratus graduan mempamerkan pengetahuan, pemahaman dan kemahiran kognitif dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "80%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 13, "bidang": "BIDANG 2", "noKpi": "F6-KPI 13", "pernyataan": "PEO 2: Peratus graduan menunjukkan kecakapan kerja dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "70%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 14, "bidang": "BIDANG 2", "noKpi": "F6-KPI 14", "pernyataan": "PEO 3: Peratus graduan menunjukkan kemahiran personal dan kemahiran keusahawanan dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "10%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 15, "bidang": "BIDANG 2", "noKpi": "F6-KPI 15", "pernyataan": "PEO 4: Peratus graduan mempamerkan etika dan profesionalisme, kepimpinan, autonomi dan tanggungjawab dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "90%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 16, "bidang": "BIDANG 2", "noKpi": "F7-KPI 16", "pernyataan": "Peratus pelaksanaan MMI mengikut jadual waktu", "penyelaras": "KJTEE & KJPU", "sasaran": "100%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 17, "bidang": "BIDANG 2", "noKpi": "F7-KPI 17", "pernyataan": "Bilangan bengkel pendedahan\r\nWritten Instructional Material (WIM)", "penyelaras": "KJTEE", "sasaran": "1", "capaiP1": "2", "pctP1Str": "200%", "capaiP2": "2", "pctP2Str": "200%", "numP1": 200.0, "numP2": 200.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 18, "bidang": "BIDANG 2", "noKpi": "F7-KPI 18", "pernyataan": "Bilangan program pemantapan digital di kalangan pensyarah", "penyelaras": "KJPro", "sasaran": "2", "capaiP1": "2", "pctP1Str": "100%", "capaiP2": "3", "pctP2Str": "150%", "numP1": 100.0, "numP2": 150.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 19, "bidang": "BIDANG 2", "noKpi": "F7-KPI 19", "pernyataan": "Peratus pensyarah melebihi 90% dalam pencerapan PdP", "penyelaras": "KJPro", "sasaran": "100%", "capaiP1": "73%", "pctP1Str": "73%", "capaiP2": "73%", "pctP2Str": "73%", "numP1": 73.0, "numP2": 73.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"}, {"bil": 20, "bidang": "BIDANG 2", "noKpi": "F8-KPI 20", "pernyataan": "Bilangan program pemantapan 4P", "penyelaras": "KJPP", "sasaran": "2", "capaiP1": "2", "pctP1Str": "100%", "capaiP2": "4", "pctP2Str": "200%", "numP1": 100.0, "numP2": 200.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 21, "bidang": "BIDANG 2", "noKpi": "F9-KPI 21", "pernyataan": "Peratus pematuhan Prosedur Pengurusan Pentaksiran dan Penilaian mengikut standard pengurusan kualiti", "penyelaras": "KJPP", "sasaran": "100%", "capaiP1": "100%", "pctP1Str": "100%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 22, "bidang": "BIDANG 2", "noKpi": "F10-KPI 22", "pernyataan": "Peratus pelajar lulus SVM (K2024)", "penyelaras": "KJTEE & KJPU", "sasaran": "98%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "99.3%", "pctP2Str": "101%", "numP1": 0.0, "numP2": 101.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 23, "bidang": "BIDANG 2", "noKpi": "F10-KPI 23", "pernyataan": "Peratus pelajar SVM layak ke program DVM (K2024)", "penyelaras": "KJTEE & KJPU", "sasaran": "98%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "100%", "pctP2Str": "102%", "numP1": 0.0, "numP2": 102.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 24, "bidang": "BIDANG 2", "noKpi": "F10-KPI 24", "pernyataan": "Peratus pelajar memperoleh SKM Tahap 3 (K2024)", "penyelaras": "KJTEE", "sasaran": "100%", "capaiP1": "100%", "pctP1Str": "100%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 25, "bidang": "BIDANG 2", "noKpi": "F11-KPI 25", "pernyataan": "Peratus pelajar DVM bergraduat (A2023)", "penyelaras": "KJTEE & KJPU", "sasaran": "100%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 26, "bidang": "BIDANG 2", "noKpi": "F12-KPI 26", "pernyataan": "Bilangan pensyarah terlibat LSI bagi setiap program (2 Elektrik & 2 Elektronik)", "penyelaras": "KJPro", "sasaran": "4", "capaiP1": "4", "pctP1Str": "100%", "capaiP2": "4", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 27, "bidang": "BIDANG 2", "noKpi": "F13-KPI 27", "pernyataan": "Peratus pensyarah vokasional mempunyai sekurang-kurangnya SKM Tahap 3", "penyelaras": "KJTEE", "sasaran": "90%", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "74.5%", "pctP2Str": "83%", "numP1": 0.0, "numP2": 83.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"}, {"bil": 28, "bidang": "BIDANG 2", "noKpi": "F13-KPI 28", "pernyataan": "Peratus pensyarah vokasional mempunyai TVET-i", "penyelaras": "KJTEE", "sasaran": "90%", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "69%", "pctP2Str": "77%", "numP1": 0.0, "numP2": 77.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"}, {"bil": 29, "bidang": "BIDANG 2", "noKpi": "F13-KPI 29", "pernyataan": "Bilangan pensyarah vokasional mendaftar GT.", "penyelaras": "KJTEE", "sasaran": "100%", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "96%", "pctP2Str": "96%", "numP1": 0.0, "numP2": 96.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"}, {"bil": 30, "bidang": "BIDANG 2", "noKpi": "F13-KPI 30", "pernyataan": "Bilangan pensyarah vokasional mendapat gelaran Ts.", "penyelaras": "KJTEE", "sasaran": "2", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "3", "pctP2Str": "150%", "numP1": 0.0, "numP2": 150.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 31, "bidang": "BIDANG 2", "noKpi": "F14-KPI 31", "pernyataan": "Bilangan kajian tindakan", "penyelaras": "KJIno", "sasaran": "2", "capaiP1": "3", "pctP1Str": "150%", "capaiP2": "5", "pctP2Str": "250%", "numP1": 150.0, "numP2": 250.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 32, "bidang": "BIDANG 2", "noKpi": "F14-KPI 32", "pernyataan": "Bilangan inovasi dihasilkan (saf akademik)", "penyelaras": "KJIno", "sasaran": "2", "capaiP1": "1", "pctP1Str": "50%", "capaiP2": "3", "pctP2Str": "150%", "numP1": 50.0, "numP2": 150.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 33, "bidang": "BIDANG 2", "noKpi": "F15-KPI 33", "pernyataan": "Bilangan penyertaan inovasi ke peringkat kebangsaan/ antarabangsa (pelajar)", "penyelaras": "KJIno", "sasaran": "10", "capaiP1": "6", "pctP1Str": "60%", "capaiP2": "19", "pctP2Str": "190%", "numP1": 60.0, "numP2": 190.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 34, "bidang": "BIDANG 3", "noKpi": "F16-KPI 34", "pernyataan": "Peratus pelajar mendaftar (K2026)", "penyelaras": "KJHEP", "sasaran": "100%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 35, "bidang": "BIDANG 3", "noKpi": "F17-KPI 35", "pernyataan": "Peratus kehadiran pelajar", "penyelaras": "KJHEP", "sasaran": "96%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 36, "bidang": "BIDANG 3", "noKpi": "F18-KPI 36", "pernyataan": "Analisa peratus tahap\r\nkepuasan pelanggan terhadap khidmat sokongan pelajar (Skala 3-4)", "penyelaras": "KJHEP", "sasaran": "85%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 37, "bidang": "BIDANG 3", "noKpi": "F18-KPI 37", "pernyataan": "Bilangan program kokurikulum dianjurkan", "penyelaras": "KJHEP", "sasaran": "8", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 38, "bidang": "BIDANG 3", "noKpi": "F18-KPI 38", "pernyataan": "Bilangan program dijalankan oleh MPP", "penyelaras": "KJHEP", "sasaran": "6", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 39, "bidang": "BIDANG 3", "noKpi": "F18-KPI 39", "pernyataan": "Peratus penerima biasiswa/ bantuan daripada pelajar yang memohon", "penyelaras": "KJHEP", "sasaran": "50%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 40, "bidang": "BIDANG 3", "noKpi": "F19-KPI 40", "pernyataan": "Bilangan program melibatkan komuniti setempat/ PIBG/ alumni", "penyelaras": "KJHEP", "sasaran": "4", "capaiP1": "1", "pctP1Str": "25%", "capaiP2": "2", "pctP2Str": "50%", "numP1": 25.0, "numP2": 50.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"}, {"bil": 41, "bidang": "BIDANG 3", "noKpi": "F20-KPI 41", "pernyataan": "Peratus koleksi e-book di PS", "penyelaras": "KJCorp", "sasaran": "80%", "capaiP1": "0%", "pctP1Str": "0%", "capaiP2": "90%", "pctP2Str": "113%", "numP1": 0.0, "numP2": 113.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 42, "bidang": "BIDANG 3", "noKpi": "F20-KPI 42", "pernyataan": "Penarafan bintang asrama kondusif", "penyelaras": "KJHEP", "sasaran": "4", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 43, "bidang": "BIDANG 3", "noKpi": "F21-KPI 43", "pernyataan": "Bilangan program bersama institusi TVET/ industri yang terlibat MoU/ NoU", "penyelaras": "KJHIA", "sasaran": "3", "capaiP1": "5", "pctP1Str": "167%", "capaiP2": "7", "pctP2Str": "233%", "numP1": 167.0, "numP2": 233.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 44, "bidang": "BIDANG 3", "noKpi": "F21-KPI 44", "pernyataan": "Bilangan lawatan penanda aras/ lawatan industri", "penyelaras": "KJCorp", "sasaran": "3", "capaiP1": "2", "pctP1Str": "67%", "capaiP2": "4", "pctP2Str": "133%", "numP1": 67.0, "numP2": 133.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 45, "bidang": "BIDANG 3", "noKpi": "F22-KPI 45", "pernyataan": "Peratus kebolehpasaran graduan (A2023)", "penyelaras": "KJHEP", "sasaran": "100%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 46, "bidang": "BIDANG 3", "noKpi": "F22-KPI 46", "pernyataan": "Peratus graduan bekerja dalam bidang (A2023)", "penyelaras": "KJHEP", "sasaran": "70%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 47, "bidang": "BIDANG 3", "noKpi": "F22-KPI 47", "pernyataan": "Peratus graduan menyambung pengajian (A2023)", "penyelaras": "KJHEP", "sasaran": "20%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 48, "bidang": "BIDANG 3", "noKpi": "F22-KPI 48", "pernyataan": "Peratus graduan terlibat keusahawanan (A2023)", "penyelaras": "KJHEP", "sasaran": "10%", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 49, "bidang": "BIDANG 4", "noKpi": "F23-KPI 49", "pernyataan": "Peratus pensyarah melebihi 90% dalam PBPPP", "penyelaras": "KJK", "sasaran": "92%", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "100%", "pctP2Str": "109%", "numP1": 0.0, "numP2": 109.0, "statusRaw": "🟢 Melebihi Sasaran", "statusCat": "Melebihi Sasaran"}, {"bil": 50, "bidang": "BIDANG 4", "noKpi": "F23-KPI 50", "pernyataan": "Peratus AKP melebihi 90% dalam MyPerformance", "penyelaras": "KJK", "sasaran": "90%", "capaiP1": "50%", "pctP1Str": "56%", "capaiP2": "100%\nAKP siap", "pctP2Str": "", "numP1": null, "numP2": null, "statusRaw": "🟡 Perlu Pengesahan", "statusCat": "Perlu Pengesahan"}, {"bil": 51, "bidang": "BIDANG 4", "noKpi": "F24-KPI 51", "pernyataan": "Bilangan zon melepasi 80% dalam audit dalaman EKSA", "penyelaras": "KU Persijilan Profesional & Penarafan Program", "sasaran": "6", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "5", "pctP2Str": "83%", "numP1": 0.0, "numP2": 83.0, "statusRaw": "🔴 Belum Mencapai Sasaran", "statusCat": "Belum Mencapai Sasaran"}, {"bil": 52, "bidang": "BIDANG 4", "noKpi": "F24-KPI 52", "pernyataan": "Bilangan zon melepasi 80% dalam audit dalaman OSH", "penyelaras": "KU Persijilan Profesional & Penarafan Program", "sasaran": "6", "capaiP1": "0", "pctP1Str": "0%", "capaiP2": "6", "pctP2Str": "100%", "numP1": 0.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 53, "bidang": "BIDANG 4", "noKpi": "F25-KPI 53", "pernyataan": "Kelulusan akreditasi MQA", "penyelaras": "KU Akreditasi DVM", "sasaran": "1", "capaiP1": "1", "pctP1Str": "100%", "capaiP2": "1", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 54, "bidang": "BIDANG 4", "noKpi": "F25-KPI 54", "pernyataan": "Kelulusan akreditasi MBOT", "penyelaras": "KU Akreditasi DVM", "sasaran": "6", "capaiP1": "6", "pctP1Str": "100%", "capaiP2": "6", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 55, "bidang": "BIDANG 4", "noKpi": "F25-KPI 55", "pernyataan": "Kelulusan akreditasi JPK (Pusat bertauliah) / COPTPA", "penyelaras": "KU Persijilan SVM & SKM", "sasaran": "2", "capaiP1": "2", "pctP1Str": "100%", "capaiP2": "2", "pctP2Str": "100%", "numP1": 100.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 56, "bidang": "BIDANG 4", "noKpi": "F26-KPI 56", "pernyataan": "Peratus pematuhan Standard Prosedur Kualiti (SPK) KVKPM 2.0", "penyelaras": "KU Pengurusan Kualiti", "sasaran": "100%", "capaiP1": "33%", "pctP1Str": "33%", "capaiP2": "100%", "pctP2Str": "100%", "numP1": 33.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}, {"bil": 57, "bidang": "BIDANG 4", "noKpi": "F26-KPI 57", "pernyataan": "Bilangan program penambahbaikan berterusan melibatkan TAC, Penilai Luar dan alumni", "penyelaras": "KJK", "sasaran": "2", "capaiP1": "1", "pctP1Str": "50%", "capaiP2": "2", "pctP2Str": "100%", "numP1": 50.0, "numP2": 100.0, "statusRaw": "🔵 Mencapai Sasaran", "statusCat": "Mencapai Sasaran"}], "2027": [{"bil": 1, "bidang": "BIDANG 1", "noKpi": "FI-KPI 1", "pernyataan": "Kecukupan staf akademik dalam bidang", "penyelaras": "TPA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 2, "bidang": "BIDANG 1", "noKpi": "F1-KPI 2", "pernyataan": "Kecukupan staf bukan akademik", "penyelaras": "TPA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 3, "bidang": "BIDANG 1", "noKpi": "F1-KPI 3", "pernyataan": "Pemohonan kenaikan pangkat mengikut kelayakan staf", "penyelaras": "TPA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 4, "bidang": "BIDANG 1", "noKpi": "F2-KPI 4", "pernyataan": "Status prestasi kewangan eSPKWS\nCemerlang: 3\nBaik: 2\nMemuaskan: 1", "penyelaras": "TPA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 5, "bidang": "BIDANG 1", "noKpi": "F3-KPI 5", "pernyataan": "Peratus pembelian harta modal tahun semasa mengikut keperluan program", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 6, "bidang": "BIDANG 1", "noKpi": "F3-KPI 6", "pernyataan": "Peratus penyelenggaraan aset berdasarkan peruntukan yang diperolehi", "penyelaras": "Pegawai Aset", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 7, "bidang": "BIDANG 1", "noKpi": "F4-KPI 7", "pernyataan": "Bilangan program sokongan untuk AKP", "penyelaras": "KJPro", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 8, "bidang": "BIDANG 2", "noKpi": "F5-KPI 8", "pernyataan": "PEO 1: Peratus graduan mempamerkan pengetahuan, pemahaman dan kemahiran kognitif dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 9, "bidang": "BIDANG 2", "noKpi": "F5-KPI 9", "pernyataan": "PEO 2: Peratus graduan menunjukkan kecakapan kerja dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 10, "bidang": "BIDANG 2", "noKpi": "F5-KPI 10", "pernyataan": "PEO 3: Peratus graduan menunjukkan kemahiran personal dan kemahiran keusahawanan dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 11, "bidang": "BIDANG 2", "noKpi": "F5-KPI 11", "pernyataan": "PEO 4: Peratus graduan mempamerkan etika dan profesionalisme, kepimpinan, autonomi dan tanggungjawab dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 12, "bidang": "BIDANG 2", "noKpi": "F6-KPI 12", "pernyataan": "PEO 1: Peratus graduan mempamerkan pengetahuan, pemahaman dan kemahiran kognitif dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 13, "bidang": "BIDANG 2", "noKpi": "F6-KPI 13", "pernyataan": "PEO 2: Peratus graduan menunjukkan kecakapan kerja dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 14, "bidang": "BIDANG 2", "noKpi": "F6-KPI 14", "pernyataan": "PEO 3: Peratus graduan menunjukkan kemahiran personal dan kemahiran keusahawanan dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 15, "bidang": "BIDANG 2", "noKpi": "F6-KPI 15", "pernyataan": "PEO 4: Peratus graduan mempamerkan etika dan profesionalisme, kepimpinan, autonomi dan tanggungjawab dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 16, "bidang": "BIDANG 2", "noKpi": "F7-KPI 16", "pernyataan": "Peratus pelaksanaan MMI mengikut jadual waktu", "penyelaras": "KJTEE & KJPU", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 17, "bidang": "BIDANG 2", "noKpi": "F7-KPI 17", "pernyataan": "Bilangan bengkel pendedahan\r\nWritten Instructional Material (WIM)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 18, "bidang": "BIDANG 2", "noKpi": "F7-KPI 18", "pernyataan": "Bilangan program pemantapan digital di kalangan pensyarah", "penyelaras": "KJPro", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 19, "bidang": "BIDANG 2", "noKpi": "F7-KPI 19", "pernyataan": "Peratus pensyarah melebihi 90% dalam pencerapan PdP", "penyelaras": "KJPro", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 20, "bidang": "BIDANG 2", "noKpi": "F8-KPI 20", "pernyataan": "Bilangan program pemantapan 4P", "penyelaras": "KJPP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 21, "bidang": "BIDANG 2", "noKpi": "F9-KPI 21", "pernyataan": "Peratus pematuhan Prosedur Pengurusan Pentaksiran dan Penilaian mengikut standard pengurusan kualiti", "penyelaras": "KJPP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 22, "bidang": "BIDANG 2", "noKpi": "F10-KPI 22", "pernyataan": "Peratus pelajar lulus SVM (K2024)", "penyelaras": "KJTEE & KJPU", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 23, "bidang": "BIDANG 2", "noKpi": "F10-KPI 23", "pernyataan": "Peratus pelajar SVM layak ke program DVM (K2024)", "penyelaras": "KJTEE & KJPU", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 24, "bidang": "BIDANG 2", "noKpi": "F10-KPI 24", "pernyataan": "Peratus pelajar memperoleh SKM Tahap 3 (K2024)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 25, "bidang": "BIDANG 2", "noKpi": "F11-KPI 25", "pernyataan": "Peratus pelajar DVM bergraduat (A2023)", "penyelaras": "KJTEE & KJPU", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 26, "bidang": "BIDANG 2", "noKpi": "F12-KPI 26", "pernyataan": "Bilangan pensyarah terlibat LSI bagi setiap program (2 Elektrik & 2 Elektronik)", "penyelaras": "KJPro", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 27, "bidang": "BIDANG 2", "noKpi": "F13-KPI 27", "pernyataan": "Peratus pensyarah vokasional mempunyai sekurang-kurangnya SKM Tahap 3", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 28, "bidang": "BIDANG 2", "noKpi": "F13-KPI 28", "pernyataan": "Peratus pensyarah vokasional mempunyai TVET-i", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 29, "bidang": "BIDANG 2", "noKpi": "F13-KPI 29", "pernyataan": "Bilangan pensyarah vokasional mendaftar GT.", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 30, "bidang": "BIDANG 2", "noKpi": "F13-KPI 30", "pernyataan": "Bilangan pensyarah vokasional mendapat gelaran Ts.", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 31, "bidang": "BIDANG 2", "noKpi": "F14-KPI 31", "pernyataan": "Bilangan kajian tindakan", "penyelaras": "KJIno", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 32, "bidang": "BIDANG 2", "noKpi": "F14-KPI 32", "pernyataan": "Bilangan inovasi dihasilkan (saf akademik)", "penyelaras": "KJIno", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 33, "bidang": "BIDANG 2", "noKpi": "F15-KPI 33", "pernyataan": "Bilangan penyertaan inovasi ke peringkat kebangsaan/ antarabangsa (pelajar)", "penyelaras": "KJIno", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 34, "bidang": "BIDANG 3", "noKpi": "F16-KPI 34", "pernyataan": "Peratus pelajar mendaftar (K2026)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 35, "bidang": "BIDANG 3", "noKpi": "F17-KPI 35", "pernyataan": "Peratus kehadiran pelajar", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 36, "bidang": "BIDANG 3", "noKpi": "F18-KPI 36", "pernyataan": "Analisa peratus tahap\r\nkepuasan pelanggan terhadap khidmat sokongan pelajar (Skala 3-4)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 37, "bidang": "BIDANG 3", "noKpi": "F18-KPI 37", "pernyataan": "Bilangan program kokurikulum dianjurkan", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 38, "bidang": "BIDANG 3", "noKpi": "F18-KPI 38", "pernyataan": "Bilangan program dijalankan oleh MPP", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 39, "bidang": "BIDANG 3", "noKpi": "F18-KPI 39", "pernyataan": "Peratus penerima biasiswa/ bantuan daripada pelajar yang memohon", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 40, "bidang": "BIDANG 3", "noKpi": "F19-KPI 40", "pernyataan": "Bilangan program melibatkan komuniti setempat/ PIBG/ alumni", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 41, "bidang": "BIDANG 3", "noKpi": "F20-KPI 41", "pernyataan": "Peratus koleksi e-book di PS", "penyelaras": "KJCorp", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 42, "bidang": "BIDANG 3", "noKpi": "F20-KPI 42", "pernyataan": "Penarafan bintang asrama kondusif", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 43, "bidang": "BIDANG 3", "noKpi": "F21-KPI 43", "pernyataan": "Bilangan program bersama institusi TVET/ industri yang terlibat MoU/ NoU", "penyelaras": "KJHIA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 44, "bidang": "BIDANG 3", "noKpi": "F21-KPI 44", "pernyataan": "Bilangan lawatan penanda aras/ lawatan industri", "penyelaras": "KJCorp", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 45, "bidang": "BIDANG 3", "noKpi": "F22-KPI 45", "pernyataan": "Peratus kebolehpasaran graduan (A2023)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 46, "bidang": "BIDANG 3", "noKpi": "F22-KPI 46", "pernyataan": "Peratus graduan bekerja dalam bidang (A2023)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 47, "bidang": "BIDANG 3", "noKpi": "F22-KPI 47", "pernyataan": "Peratus graduan menyambung pengajian (A2023)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 48, "bidang": "BIDANG 3", "noKpi": "F22-KPI 48", "pernyataan": "Peratus graduan terlibat keusahawanan (A2023)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 49, "bidang": "BIDANG 4", "noKpi": "F23-KPI 49", "pernyataan": "Peratus pensyarah melebihi 90% dalam PBPPP", "penyelaras": "KJK", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 50, "bidang": "BIDANG 4", "noKpi": "F23-KPI 50", "pernyataan": "Peratus AKP melebihi 90% dalam MyPerformance", "penyelaras": "KJK", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 51, "bidang": "BIDANG 4", "noKpi": "F24-KPI 51", "pernyataan": "Bilangan zon melepasi 80% dalam audit dalaman EKSA", "penyelaras": "KU Persijilan Profesional & Penarafan Program", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 52, "bidang": "BIDANG 4", "noKpi": "F24-KPI 52", "pernyataan": "Bilangan zon melepasi 80% dalam audit dalaman OSH", "penyelaras": "KU Persijilan Profesional & Penarafan Program", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 53, "bidang": "BIDANG 4", "noKpi": "F25-KPI 53", "pernyataan": "Kelulusan akreditasi MQA", "penyelaras": "KU Akreditasi DVM", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 54, "bidang": "BIDANG 4", "noKpi": "F25-KPI 54", "pernyataan": "Kelulusan akreditasi MBOT", "penyelaras": "KU Akreditasi DVM", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 55, "bidang": "BIDANG 4", "noKpi": "F25-KPI 55", "pernyataan": "Kelulusan akreditasi JPK (Pusat bertauliah) / COPTPA", "penyelaras": "KU Persijilan SVM & SKM", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 56, "bidang": "BIDANG 4", "noKpi": "F26-KPI 56", "pernyataan": "Peratus pematuhan Standard Prosedur Kualiti (SPK) KVKPM 2.0", "penyelaras": "KU Pengurusan Kualiti", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 57, "bidang": "BIDANG 4", "noKpi": "F26-KPI 57", "pernyataan": "Bilangan program penambahbaikan berterusan melibatkan TAC, Penilai Luar dan alumni", "penyelaras": "KJK", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}], "2028": [{"bil": 1, "bidang": "BIDANG 1", "noKpi": "FI-KPI 1", "pernyataan": "Kecukupan staf akademik dalam bidang", "penyelaras": "TPA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 2, "bidang": "BIDANG 1", "noKpi": "F1-KPI 2", "pernyataan": "Kecukupan staf bukan akademik", "penyelaras": "TPA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 3, "bidang": "BIDANG 1", "noKpi": "F1-KPI 3", "pernyataan": "Pemohonan kenaikan pangkat mengikut kelayakan staf", "penyelaras": "TPA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 4, "bidang": "BIDANG 1", "noKpi": "F2-KPI 4", "pernyataan": "Status prestasi kewangan eSPKWS\nCemerlang: 3\nBaik: 2\nMemuaskan: 1", "penyelaras": "TPA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 5, "bidang": "BIDANG 1", "noKpi": "F3-KPI 5", "pernyataan": "Peratus pembelian harta modal tahun semasa mengikut keperluan program", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 6, "bidang": "BIDANG 1", "noKpi": "F3-KPI 6", "pernyataan": "Peratus penyelenggaraan aset berdasarkan peruntukan yang diperolehi", "penyelaras": "Pegawai Aset", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 7, "bidang": "BIDANG 1", "noKpi": "F4-KPI 7", "pernyataan": "Bilangan program sokongan untuk AKP", "penyelaras": "KJPro", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 8, "bidang": "BIDANG 2", "noKpi": "F5-KPI 8", "pernyataan": "PEO 1: Peratus graduan mempamerkan pengetahuan, pemahaman dan kemahiran kognitif dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 9, "bidang": "BIDANG 2", "noKpi": "F5-KPI 9", "pernyataan": "PEO 2: Peratus graduan menunjukkan kecakapan kerja dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 10, "bidang": "BIDANG 2", "noKpi": "F5-KPI 10", "pernyataan": "PEO 3: Peratus graduan menunjukkan kemahiran personal dan kemahiran keusahawanan dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 11, "bidang": "BIDANG 2", "noKpi": "F5-KPI 11", "pernyataan": "PEO 4: Peratus graduan mempamerkan etika dan profesionalisme, kepimpinan, autonomi dan tanggungjawab dalam bidang elektrik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 12, "bidang": "BIDANG 2", "noKpi": "F6-KPI 12", "pernyataan": "PEO 1: Peratus graduan mempamerkan pengetahuan, pemahaman dan kemahiran kognitif dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 13, "bidang": "BIDANG 2", "noKpi": "F6-KPI 13", "pernyataan": "PEO 2: Peratus graduan menunjukkan kecakapan kerja dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 14, "bidang": "BIDANG 2", "noKpi": "F6-KPI 14", "pernyataan": "PEO 3: Peratus graduan menunjukkan kemahiran personal dan kemahiran keusahawanan dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 15, "bidang": "BIDANG 2", "noKpi": "F6-KPI 15", "pernyataan": "PEO 4: Peratus graduan mempamerkan etika dan profesionalisme, kepimpinan, autonomi dan tanggungjawab dalam bidang elektronik (A2021)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 16, "bidang": "BIDANG 2", "noKpi": "F7-KPI 16", "pernyataan": "Peratus pelaksanaan MMI mengikut jadual waktu", "penyelaras": "KJTEE & KJPU", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 17, "bidang": "BIDANG 2", "noKpi": "F7-KPI 17", "pernyataan": "Bilangan bengkel pendedahan\r\nWritten Instructional Material (WIM)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 18, "bidang": "BIDANG 2", "noKpi": "F7-KPI 18", "pernyataan": "Bilangan program pemantapan digital di kalangan pensyarah", "penyelaras": "KJPro", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 19, "bidang": "BIDANG 2", "noKpi": "F7-KPI 19", "pernyataan": "Peratus pensyarah melebihi 90% dalam pencerapan PdP", "penyelaras": "KJPro", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 20, "bidang": "BIDANG 2", "noKpi": "F8-KPI 20", "pernyataan": "Bilangan program pemantapan 4P", "penyelaras": "KJPP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 21, "bidang": "BIDANG 2", "noKpi": "F9-KPI 21", "pernyataan": "Peratus pematuhan Prosedur Pengurusan Pentaksiran dan Penilaian mengikut standard pengurusan kualiti", "penyelaras": "KJPP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 22, "bidang": "BIDANG 2", "noKpi": "F10-KPI 22", "pernyataan": "Peratus pelajar lulus SVM (K2024)", "penyelaras": "KJTEE & KJPU", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 23, "bidang": "BIDANG 2", "noKpi": "F10-KPI 23", "pernyataan": "Peratus pelajar SVM layak ke program DVM (K2024)", "penyelaras": "KJTEE & KJPU", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 24, "bidang": "BIDANG 2", "noKpi": "F10-KPI 24", "pernyataan": "Peratus pelajar memperoleh SKM Tahap 3 (K2024)", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 25, "bidang": "BIDANG 2", "noKpi": "F11-KPI 25", "pernyataan": "Peratus pelajar DVM bergraduat (A2023)", "penyelaras": "KJTEE & KJPU", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 26, "bidang": "BIDANG 2", "noKpi": "F12-KPI 26", "pernyataan": "Bilangan pensyarah terlibat LSI bagi setiap program (2 Elektrik & 2 Elektronik)", "penyelaras": "KJPro", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 27, "bidang": "BIDANG 2", "noKpi": "F13-KPI 27", "pernyataan": "Peratus pensyarah vokasional mempunyai sekurang-kurangnya SKM Tahap 3", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 28, "bidang": "BIDANG 2", "noKpi": "F13-KPI 28", "pernyataan": "Peratus pensyarah vokasional mempunyai TVET-i", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 29, "bidang": "BIDANG 2", "noKpi": "F13-KPI 29", "pernyataan": "Bilangan pensyarah vokasional mendaftar GT.", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 30, "bidang": "BIDANG 2", "noKpi": "F13-KPI 30", "pernyataan": "Bilangan pensyarah vokasional mendapat gelaran Ts.", "penyelaras": "KJTEE", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 31, "bidang": "BIDANG 2", "noKpi": "F14-KPI 31", "pernyataan": "Bilangan kajian tindakan", "penyelaras": "KJIno", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 32, "bidang": "BIDANG 2", "noKpi": "F14-KPI 32", "pernyataan": "Bilangan inovasi dihasilkan (saf akademik)", "penyelaras": "KJIno", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 33, "bidang": "BIDANG 2", "noKpi": "F15-KPI 33", "pernyataan": "Bilangan penyertaan inovasi ke peringkat kebangsaan/ antarabangsa (pelajar)", "penyelaras": "KJIno", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 34, "bidang": "BIDANG 3", "noKpi": "F16-KPI 34", "pernyataan": "Peratus pelajar mendaftar (K2026)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 35, "bidang": "BIDANG 3", "noKpi": "F17-KPI 35", "pernyataan": "Peratus kehadiran pelajar", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 36, "bidang": "BIDANG 3", "noKpi": "F18-KPI 36", "pernyataan": "Analisa peratus tahap\r\nkepuasan pelanggan terhadap khidmat sokongan pelajar (Skala 3-4)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 37, "bidang": "BIDANG 3", "noKpi": "F18-KPI 37", "pernyataan": "Bilangan program kokurikulum dianjurkan", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 38, "bidang": "BIDANG 3", "noKpi": "F18-KPI 38", "pernyataan": "Bilangan program dijalankan oleh MPP", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 39, "bidang": "BIDANG 3", "noKpi": "F18-KPI 39", "pernyataan": "Peratus penerima biasiswa/ bantuan daripada pelajar yang memohon", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 40, "bidang": "BIDANG 3", "noKpi": "F19-KPI 40", "pernyataan": "Bilangan program melibatkan komuniti setempat/ PIBG/ alumni", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 41, "bidang": "BIDANG 3", "noKpi": "F20-KPI 41", "pernyataan": "Peratus koleksi e-book di PS", "penyelaras": "KJCorp", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 42, "bidang": "BIDANG 3", "noKpi": "F20-KPI 42", "pernyataan": "Penarafan bintang asrama kondusif", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 43, "bidang": "BIDANG 3", "noKpi": "F21-KPI 43", "pernyataan": "Bilangan program bersama institusi TVET/ industri yang terlibat MoU/ NoU", "penyelaras": "KJHIA", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 44, "bidang": "BIDANG 3", "noKpi": "F21-KPI 44", "pernyataan": "Bilangan lawatan penanda aras/ lawatan industri", "penyelaras": "KJCorp", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 45, "bidang": "BIDANG 3", "noKpi": "F22-KPI 45", "pernyataan": "Peratus kebolehpasaran graduan (A2023)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 46, "bidang": "BIDANG 3", "noKpi": "F22-KPI 46", "pernyataan": "Peratus graduan bekerja dalam bidang (A2023)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 47, "bidang": "BIDANG 3", "noKpi": "F22-KPI 47", "pernyataan": "Peratus graduan menyambung pengajian (A2023)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 48, "bidang": "BIDANG 3", "noKpi": "F22-KPI 48", "pernyataan": "Peratus graduan terlibat keusahawanan (A2023)", "penyelaras": "KJHEP", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 49, "bidang": "BIDANG 4", "noKpi": "F23-KPI 49", "pernyataan": "Peratus pensyarah melebihi 90% dalam PBPPP", "penyelaras": "KJK", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 50, "bidang": "BIDANG 4", "noKpi": "F23-KPI 50", "pernyataan": "Peratus AKP melebihi 90% dalam MyPerformance", "penyelaras": "KJK", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 51, "bidang": "BIDANG 4", "noKpi": "F24-KPI 51", "pernyataan": "Bilangan zon melepasi 80% dalam audit dalaman EKSA", "penyelaras": "KU Persijilan Profesional & Penarafan Program", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 52, "bidang": "BIDANG 4", "noKpi": "F24-KPI 52", "pernyataan": "Bilangan zon melepasi 80% dalam audit dalaman OSH", "penyelaras": "KU Persijilan Profesional & Penarafan Program", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 53, "bidang": "BIDANG 4", "noKpi": "F25-KPI 53", "pernyataan": "Kelulusan akreditasi MQA", "penyelaras": "KU Akreditasi DVM", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 54, "bidang": "BIDANG 4", "noKpi": "F25-KPI 54", "pernyataan": "Kelulusan akreditasi MBOT", "penyelaras": "KU Akreditasi DVM", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 55, "bidang": "BIDANG 4", "noKpi": "F25-KPI 55", "pernyataan": "Kelulusan akreditasi JPK (Pusat bertauliah) / COPTPA", "penyelaras": "KU Persijilan SVM & SKM", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 56, "bidang": "BIDANG 4", "noKpi": "F26-KPI 56", "pernyataan": "Peratus pematuhan Standard Prosedur Kualiti (SPK) KVKPM 2.0", "penyelaras": "KU Pengurusan Kualiti", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}, {"bil": 57, "bidang": "BIDANG 4", "noKpi": "F26-KPI 57", "pernyataan": "Bilangan program penambahbaikan berterusan melibatkan TAC, Penilai Luar dan alumni", "penyelaras": "KJK", "sasaran": "", "capaiP1": "", "pctP1Str": "", "capaiP2": "", "pctP2Str": "", "numP1": 0.0, "numP2": 0.0, "statusRaw": "🔘 Data Belum Direkodkan", "statusCat": "Data Belum Direkodkan"}]};
 
-        // Mengisi template master data 2027 & 2028 berpandukan struktur 2026
-        ["2027", "2028"].forEach(y => {
-            EMBEDDED_MASTER_DATA[y] = EMBEDDED_MASTER_DATA["2026"].map(item => ({
-                ...item,
-                sasaran: "", capaiP1: "", pctP1Str: "", capaiP2: "", pctP2Str: "",
-                numP1: 0.0, numP2: 0.0, statusRaw: "🔘 Data Belum Direkodkan", statusCat: "Data Belum Direkodkan"
-            }));
-        });
-
-        // URL Terbitan Google Sheets (setiap tahun menggunakan gid berbeza)
-        // Data diakses melalui Google Visualization JSONP supaya tidak bergantung
-        // pada fetch() silang domain yang sering disekat apabila di-embed dalam Google Sites.
         const SHEET_CSV_URLS = {
             '2026': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRq1queXP1JHO-DnCMPGb9hKktGLr2K2QKHQ5CHEGMmxvzSfIFZA4HWSTSswvCxtLkkYPJOO-77TbXk/pub?gid=319718436&single=true&output=csv',
             '2027': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRq1queXP1JHO-DnCMPGb9hKktGLr2K2QKHQ5CHEGMmxvzSfIFZA4HWSTSswvCxtLkkYPJOO-77TbXk/pub?gid=1019928375&single=true&output=csv',
@@ -704,259 +570,206 @@
             'BIDANG 4': 'Bidang 4: Bahagian Jaminan Kualiti'
         };
 
-        // Pembolehubah Keadaan Aplikasi
         let currentYear = '2026';
-        let dataMode = 'live'; // 'live' atau 'master'
-        let autoSyncActive = true;
-        let autoSyncInterval = 60; // saat
-        let countdownTimer = autoSyncInterval;
-        let timerId = null;
-        let lastSyncTime = null;
+        let dataMode = 'live'; // 'master' atau 'live'
         let allRowsData = [];
         let activeStatusTab = 'ALL';
         let chartInstances = {};
-        let loadRequestSequence = 0; // Mengelakkan respons lama menimpa tahun yang sedang dipilih
 
-        // Fungsi Notifikasi Toast
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            if (!container) return;
-            const toast = document.createElement('div');
-            const bgClass = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-slate-800');
-            toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-lg border border-white/20 text-xs font-semibold flex items-center justify-between gap-3 pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0`;
-            toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold text-sm">✕</button>`;
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // Kemaskini Gaya Butang Mod (Live vs Master)
         function applyModeButtonStyles() {
             const btnLive = document.getElementById('mode-live');
             const btnMaster = document.getElementById('mode-master');
             if (!btnLive || !btnMaster) return;
             if (dataMode === 'live') {
-                btnLive.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs bg-emerald-600 text-white shadow transition-all flex items-center gap-1";
-                btnMaster.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1";
+                btnLive.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs bg-emerald-600 text-white shadow transition";
+                btnMaster.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs text-slate-300 hover:text-white transition";
             } else {
-                btnMaster.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs bg-indigo-600 text-white shadow transition-all flex items-center gap-1";
-                btnLive.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1";
+                btnMaster.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs bg-indigo-600 text-white shadow transition";
+                btnLive.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs text-slate-300 hover:text-white transition";
             }
         }
 
-        // Tukar Tahun Penilaian
         function switchYear(year) {
             currentYear = year;
             document.querySelectorAll('.year-btn').forEach(btn => {
-                btn.className = "year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-700 transition-all";
+                btn.className = "year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-700 transition";
             });
-            document.getElementById(`btn-${year}`).className = "year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-blue-600 text-white shadow transition-all";
+            document.getElementById(`btn-${year}`).className = "year-btn px-3 py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-blue-600 text-white shadow transition";
             document.getElementById('sec1-year-badge').innerText = year;
             resetAllFilters(false);
-            resetCountdown();
-            loadYearData(year, dataMode === 'live', false);
+            loadYearData(year, dataMode === 'live');
         }
 
-        // Tukar Mod Data (Live vs Master)
         function setDataMode(mode) {
             dataMode = mode;
             applyModeButtonStyles();
-            resetCountdown();
-            loadYearData(currentYear, mode === 'live', false);
-            showToast(mode === 'live' ? 'Mod Live Sheet diaktifkan (Google Sheets)' : 'Mod Data Master diaktifkan (57 KPI Terbina Dalam)', 'info');
+            loadYearData(currentYear, mode === 'live');
         }
 
-        // Ganti Kawalan Auto Sync Toggle
-        function toggleAutoSync() {
-            autoSyncActive = !autoSyncActive;
-            const label = document.getElementById('auto-sync-label');
-            const icon = document.getElementById('auto-sync-icon');
-            const toggleBtn = document.getElementById('auto-sync-toggle');
-
-            if (autoSyncActive) {
-                label.innerText = `Auto Live (${autoSyncInterval}s)`;
-                icon.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
-                toggleBtn.className = "bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 text-xs font-semibold px-2.5 py-2 rounded-xl transition flex items-center gap-1.5";
-                resetCountdown();
-                showToast('Penyegeraan Otomatik Diaktifkan (setiap 60s)', 'success');
-            } else {
-                label.innerText = 'Auto Dijeda';
-                icon.className = "w-2 h-2 rounded-full bg-amber-400";
-                toggleBtn.className = "bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 text-xs font-semibold px-2.5 py-2 rounded-xl transition flex items-center gap-1.5";
-                document.getElementById('timer-seconds').innerText = 'Dijeda';
-                showToast('Penyegeraan Otomatik Dijeda', 'info');
-            }
+        function syncCurrentYear() {
+            loadYearData(currentYear, true);
         }
 
-        function resetCountdown() {
-            countdownTimer = autoSyncInterval;
-            document.getElementById('timer-seconds').innerText = `${countdownTimer}s`;
-        }
-
-        // Pemprosesan Timer Auto-Refresh
-        function startAutoSyncTimer() {
-            if (timerId) clearInterval(timerId);
-            timerId = setInterval(() => {
-                if (!autoSyncActive || dataMode !== 'live') return;
-                
-                countdownTimer--;
-                if (countdownTimer <= 0) {
-                    resetCountdown();
-                    if (document.visibilityState === 'visible') {
-                        syncCurrentYear(false);
-                    }
-                } else {
-                    document.getElementById('timer-seconds').innerText = `${countdownTimer}s`;
-                }
-            }, 1000);
-        }
-
-        // Pemicu Manual / Automatik Segerak Data
-        function syncCurrentYear(isManual = true) {
-            loadYearData(currentYear, true, isManual);
-        }
-
-        // Membina maklumat endpoint daripada URL terbitan Google Sheets.
-        function getPublishedSheetInfo(year) {
+        function getCacheBustedSheetUrl(year) {
             const baseUrl = SHEET_CSV_URLS[year];
-            if (!baseUrl) throw new Error(`URL Google Sheets untuk ${year} tidak ditemui`);
-            const pubMatch = baseUrl.match(/\/spreadsheets\/d\/e\/([^/]+)\/pub/);
-            const gidMatch = baseUrl.match(/[?&]gid=(\d+)/);
-            if (!pubMatch || !gidMatch) throw new Error('Format URL Google Sheets tidak sah');
-            return { publishedId: pubMatch[1], gid: gidMatch[1] };
+            if (!baseUrl) return '';
+            const sep = baseUrl.includes('?') ? '&' : '?';
+            const nonce = `${Math.floor(Date.now() / 15000)}_${Math.random().toString(36).slice(2, 6)}`;
+            return `${baseUrl}${sep}t=${nonce}`;
         }
 
-        // Google Visualization JSONP: tiada fetch/XHR silang domain, sesuai untuk Google Sites.
-        function fetchRowsViaGoogleViz(year) {
-            return new Promise((resolve, reject) => {
-                let info;
-                try { info = getPublishedSheetInfo(year); }
-                catch (error) { reject(error); return; }
-
-                const callbackName = `__kvsmGviz_${year}_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-                const script = document.createElement('script');
-                let settled = false;
-                let timeoutId;
-
-                const cleanup = () => {
-                    if (timeoutId) clearTimeout(timeoutId);
-                    try { delete window[callbackName]; }
-                    catch (e) { window[callbackName] = undefined; }
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                };
-
-                const fail = (message) => {
-                    if (settled) return;
-                    settled = true;
-                    cleanup();
-                    reject(new Error(message));
-                };
-
-                window[callbackName] = (payload) => {
-                    if (settled) return;
-                    try {
-                        if (!payload || payload.status === 'error') {
-                            const detail = payload && payload.errors && payload.errors[0] && payload.errors[0].detailed_message;
-                            throw new Error(detail || 'Google Sheets tidak memulangkan data yang sah');
-                        }
-                        const table = payload.table;
-                        const cols = table && table.cols ? table.cols : [];
-                        const rows = table && table.rows ? table.rows : [];
-                        if (!cols.length) throw new Error('Lajur/header tidak ditemui. Semak tab yang diterbitkan.');
-
-                        const headers = cols.map((col, index) => {
-                            const label = col && (col.label || col.id);
-                            return label ? String(label).trim() : `COL_${index}`;
-                        });
-                        const mappedRows = rows.map((row) => {
-                            const record = {};
-                            const cells = row && row.c ? row.c : [];
-                            headers.forEach((header, index) => {
-                                const cell = cells[index];
-                                // Nilai format (f) diutamakan supaya tarikh/peratus kekal seperti paparan Sheet.
-                                record[header] = cell
-                                    ? (cell.f !== undefined && cell.f !== null && cell.f !== ''
-                                        ? cell.f
-                                        : (cell.v !== undefined && cell.v !== null ? cell.v : ''))
-                                    : '';
-                            });
-                            return record;
-                        });
-                        if (!mappedRows.length) throw new Error('Tab Google Sheets berjaya dicapai tetapi tiada baris data.');
-                        settled = true;
-                        cleanup();
-                        resolve(mappedRows);
-                    } catch (error) {
-                        fail(error && error.message ? error.message : 'Gagal memproses respons Google Sheets');
+        function parseCsvTextRobust(csvText) {
+            if (typeof Papa !== 'undefined') {
+                const parsed = Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true
+                });
+                if (parsed && Array.isArray(parsed.data) && parsed.data.length > 0) {
+                    return parsed.data;
+                }
+            }
+            // Fallback RFC4180 CSV parser if PapaParse CDN is blocked
+            const rows = [];
+            let cur = '';
+            let inQuotes = false;
+            let row = [];
+            const text = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                const next = text[i + 1];
+                if (ch === '"') {
+                    if (inQuotes && next === '"') {
+                        cur += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
                     }
-                };
-
-                script.onerror = () => fail('Google Viz API tidak dapat dicapai. Semak penerbitan dan akses internet.');
-                timeoutId = setTimeout(() => fail('Masa menunggu Google Sheets tamat (15 saat).'), 15000);
-                script.async = true;
-                script.src = `https://docs.google.com/spreadsheets/d/e/${info.publishedId}/gviz/tq?gid=${encodeURIComponent(info.gid)}&tqx=${encodeURIComponent(`out:json;responseHandler:${callbackName}`)}&headers=1&_=${Date.now()}`;
-                document.head.appendChild(script);
+                } else if (ch === ',' && !inQuotes) {
+                    row.push(cur);
+                    cur = '';
+                } else if (ch === '\n' && !inQuotes) {
+                    row.push(cur);
+                    if (row.some(cell => cell.trim() !== '')) rows.push(row);
+                    row = [];
+                    cur = '';
+                } else {
+                    cur += ch;
+                }
+            }
+            if (cur.length > 0 || row.length > 0) {
+                row.push(cur);
+                if (row.some(cell => cell.trim() !== '')) rows.push(row);
+            }
+            if (rows.length < 2) return [];
+            const headers = rows[0].map(h => h.trim());
+            return rows.slice(1).map(r => {
+                const obj = {};
+                headers.forEach((h, idx) => {
+                    obj[h] = r[idx] !== undefined ? r[idx] : '';
+                });
+                return obj;
             });
         }
 
-        // Alur utama memuatkan data tahun terpilih.
-        // Hanya satu kaedah rangkaian digunakan; tiada rantaian fallback yang memproses data dua kali.
-        async function loadYearData(year, forceLive = true, isManualAlert = false) {
-            const requestId = ++loadRequestSequence;
+        function isValidCsvPayload(csvText) {
+            const trimmed = (csvText || '').trim();
+            if (!trimmed) return false;
+            if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html') || trimmed.startsWith('{')) return false;
+            return trimmed.includes(',') && (trimmed.toUpperCase().includes('KPI') || trimmed.toUpperCase().includes('BIDANG'));
+        }
+
+        async function fetchWithTimeout(url, timeoutMs = 8000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { method: 'GET', cache: 'no-store', signal: controller.signal });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.text();
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+
+        async function fetchCsvMultiLayer(year) {
+            const targetUrl = getCacheBustedSheetUrl(year);
+            if (!targetUrl) throw new Error('Tiada URL CSV bagi tahun ini');
+
+            const attempts = [
+                {
+                    label: 'Terus Google CSV',
+                    run: () => fetchWithTimeout(targetUrl, 8000)
+                },
+                {
+                    label: 'Proksi AllOrigins',
+                    run: async () => {
+                        const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`, 9000);
+                        const json = JSON.parse(res);
+                        return json && json.contents ? json.contents : '';
+                    }
+                },
+                {
+                    label: 'Proksi CorsProxy',
+                    run: () => fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, 9000)
+                },
+                {
+                    label: 'Proksi CodeTabs',
+                    run: () => fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, 9000)
+                }
+            ];
+
+            let lastErr = 'Tidak dapat menyambung ke Google Sheets';
+            for (const attempt of attempts) {
+                try {
+                    const csvText = await attempt.run();
+                    if (isValidCsvPayload(csvText)) {
+                        const rows = parseCsvTextRobust(csvText);
+                        if (rows.length > 0) {
+                            return { rows, sourceLabel: attempt.label };
+                        }
+                    } else {
+                        lastErr = 'Respon bukan CSV sah (semak tetapan Publish to web)';
+                    }
+                } catch (e) {
+                    lastErr = e && e.message ? e.message : lastErr;
+                }
+            }
+            throw new Error(lastErr);
+        }
+
+        function loadYearData(year, forceLive) {
             const statusText = document.getElementById('sync-status-text');
-            const statusIndicator = document.getElementById('sync-status-indicator');
             const syncIcon = document.getElementById('sync-icon');
 
             if (dataMode === 'master' && !forceLive) {
                 const rows = (EMBEDDED_MASTER_DATA[year] || []).map(item => ({ ...item }));
-                statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0";
-                statusText.innerHTML = `📦 Memaparkan <strong class="text-indigo-300">Data Master Tahun ${year}</strong> (${rows.length} KPI terbina dalam — Mod Offline/Statis)`;
+                statusText.innerHTML = `📦 Memaparkan <strong class="text-indigo-300">Data Master Tahun ${year}</strong> (${rows.length} KPI terbina dalam)`;
                 renderFromNormalizedList(rows);
                 return;
             }
 
-            statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0";
             statusText.innerHTML = `🌐 Menarik data terkini <strong class="text-emerald-300">Tahun ${year}</strong> dari Google Sheets...`;
             syncIcon.classList.add('animate-spin');
 
-            try {
-                const rows = await fetchRowsViaGoogleViz(year);
-                // Abaikan respons lama jika pengguna sudah menukar tahun atau membuat permintaan baharu.
-                if (requestId !== loadRequestSequence || year !== currentYear || dataMode !== 'live') return;
-
-                syncIcon.classList.remove('animate-spin');
-                statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0";
-                lastSyncTime = new Date();
-                const timeStr = lastSyncTime.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                statusText.innerHTML = `✅ Live Sheet (Google Viz) <strong class="text-emerald-400">Tahun ${year}</strong> disegerakkan pada ${timeStr} (${rows.length} baris)`;
-                processCsvRows(rows);
-                if (isManualAlert) showToast(`Data Live Sheet ${year} berjaya disegerakkan!`, 'success');
-            } catch (error) {
-                if (requestId !== loadRequestSequence || year !== currentYear || dataMode !== 'live') return;
-                syncIcon.classList.remove('animate-spin');
-                fallbackToMaster(year, error && error.message ? error.message : 'Isu capaian Google Sheets');
-            }
+            fetchCsvMultiLayer(year)
+                .then(({ rows, sourceLabel }) => {
+                    syncIcon.classList.remove('animate-spin');
+                    const now = new Date().toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    statusText.innerHTML = `✅ Data Live (${sourceLabel}) <strong class="text-emerald-400">Tahun ${year}</strong> disegerakkan pada ${now} (${rows.length} baris)`;
+                    processCsvRows(rows);
+                })
+                .catch(err => {
+                    syncIcon.classList.remove('animate-spin');
+                    fallbackToMaster(year, err && err.message ? err.message : 'Gagal menarik CSV');
+                });
         }
 
-        // Fallback Kasar ke Data Master Terbina Dalam
         function fallbackToMaster(year, reason) {
-            const statusIndicator = document.getElementById('sync-status-indicator');
-            statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0";
             const rows = (EMBEDDED_MASTER_DATA[year] || []).map(item => ({ ...item }));
-            document.getElementById('sync-status-text').innerHTML = 
+            document.getElementById('sync-status-text').innerHTML =
                 `📦 <strong class="text-amber-300">Data Master Tahun ${year}</strong> dipaparkan (${reason} — ${rows.length} KPI)`;
             renderFromNormalizedList(rows);
-            showToast(`Gagal menarik Live Sheet (${reason}). Memaparkan Data Master fallback.`, 'error');
         }
 
-        // Utiliti Ekstrak Lajur CSV Fleksibel
         function getField(row, candidates) {
             const keys = Object.keys(row || {});
             for (const cand of candidates) {
@@ -969,7 +782,6 @@
             return '';
         }
 
-        // Normalize Kategori Status Pencapaian Rasmi
         function normalizeStatusCategory(rawStatus) {
             const s = String(rawStatus || '').toLowerCase().trim();
             if (s.includes('melebihi')) return 'Melebihi Sasaran';
@@ -979,7 +791,6 @@
             return 'Data Belum Direkodkan';
         }
 
-        // Parse Peratusan Nombor
         function parsePctNumber(rawVal, statusCat) {
             if (statusCat === 'Perlu Pengesahan') return null;
             const s = String(rawVal || '').trim();
@@ -990,7 +801,6 @@
             return isNaN(num) ? 0 : num;
         }
 
-        // Memproses Baris CSV Google Sheets ke Format Dinormalisasi
         function processCsvRows(rawRows) {
             const cleaned = rawRows
                 .filter(r => {
@@ -1022,14 +832,13 @@
             renderFromNormalizedList(cleaned);
         }
 
-        // Mengemaskini Semua Seksyen Dashboard (1-6)
         function renderFromNormalizedList(list) {
             allRowsData = list.map(d => {
                 const isNA = d.statusCat === 'Perlu Pengesahan';
                 const numP1 = isNA ? null : (typeof d.numP1 === 'number' ? d.numP1 : 0);
                 const numP2 = isNA ? null : (typeof d.numP2 === 'number' ? d.numP2 : 0);
-                const diffPct = (!isNA && numP1 !== null && numP2 !== null) 
-                    ? parseFloat((numP2 - numP1).toFixed(2)) 
+                const diffPct = (!isNA && numP1 !== null && numP2 !== null)
+                    ? parseFloat((numP2 - numP1).toFixed(2))
                     : null;
 
                 return {
@@ -1058,7 +867,7 @@
                 else if (item.statusCat === 'Perlu Pengesahan') countSah++;
                 else countTiada++;
 
-                // Pengiraan Purata (KECUALI Perlu Pengesahan)
+                // Semua kategori dikira KECUALI 'Perlu Pengesahan'
                 if (item.statusCat !== 'Perlu Pengesahan') {
                     sumP1 += item.numP1;
                     sumP2 += item.numP2;
@@ -1072,7 +881,6 @@
             const achievedTotal = countMelebihi + countMencapai;
             const targetRate = eligibleCount > 0 ? ((achievedTotal / eligibleCount) * 100).toFixed(2) : '0.00';
 
-            // Seksyen 1: Kad Skor Utama
             document.getElementById('overall-avg-pct').innerText = `${avgP2}%`;
             document.getElementById('overall-target-rate').innerText = `Kadar Mencapai Sasaran: ${targetRate}% (${achievedTotal}/${eligibleCount} KPI ≥100%)`;
             document.getElementById('overall-avg-desc').innerText = `Purata ${eligibleCount} daripada ${totalKpi} KPI (termasuk ${countTiada} belum direkod = 0%; ${countSah} Perlu Pengesahan dikecualikan)`;
@@ -1086,15 +894,15 @@
             const diffBadge = document.getElementById('p1-p2-diff-badge');
             const summaryNote = document.getElementById('p1-p2-summary-note');
             if (parseFloat(diffOverall) > 0) {
-                diffBadge.className = "text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200";
+                diffBadge.className = "text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
                 diffBadge.innerText = `▲ +${diffOverall}%`;
                 summaryNote.innerHTML = `Prestasi keseluruhan meningkat sebanyak <strong class="text-emerald-700">+${diffOverall}%</strong> daripada Penilaian 1 ke Penilaian 2.`;
             } else if (parseFloat(diffOverall) < 0) {
-                diffBadge.className = "text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200";
+                diffBadge.className = "text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800";
                 diffBadge.innerText = `▼ ${diffOverall}%`;
                 summaryNote.innerHTML = `Perubahan purata keseluruhan sebanyak <strong class="text-rose-700">${diffOverall}%</strong> berbanding Penilaian 1.`;
             } else {
-                diffBadge.className = "text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200";
+                diffBadge.className = "text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800";
                 diffBadge.innerText = `= 0.00%`;
                 summaryNote.innerText = `Purata pencapaian kekal konsisten antara Penilaian 1 dan Penilaian 2.`;
             }
@@ -1111,7 +919,6 @@
             document.getElementById('cnt-sah').innerText = countSah;
             document.getElementById('pct-sah').innerText = fmtPct(countSah);
 
-            // Menjana Seksyen 2, 3, 4, Sorotan, 5 & 6
             renderDomainAnalysis(avgP1, avgP2);
             renderDonutChart([countMelebihi, countMencapai, countBelum, countTiada, countSah], totalKpi);
             renderManagementAlerts();
@@ -1120,7 +927,6 @@
             applyAllFilters();
         }
 
-        // Seksyen 2 & 4: Analisis Prestasi Bidang Strategik
         function renderDomainAnalysis(overallP1, overallP2) {
             const domainOrder = ['BIDANG 1', 'BIDANG 2', 'BIDANG 3', 'BIDANG 4'];
             const domainMap = {};
@@ -1159,15 +965,14 @@
             const p1Values = domains.map(d => d.eligible > 0 ? parseFloat((d.sumP1 / d.eligible).toFixed(2)) : 0);
             const p2Values = domains.map(d => d.eligible > 0 ? parseFloat((d.sumP2 / d.eligible).toFixed(2)) : 0);
 
-            // Carta Bar Bidang (P1 vs P2)
             if (chartInstances.domainBar) chartInstances.domainBar.destroy();
             chartInstances.domainBar = new Chart(document.getElementById('domainBarChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: barLabels,
                     datasets: [
-                        { label: 'Penilaian 1 (%)', data: p1Values, backgroundColor: '#94a3b8', borderRadius: 6 },
-                        { label: 'Penilaian 2 (%)', data: p2Values, backgroundColor: '#1d4ed8', borderRadius: 6 }
+                        { label: 'Penilaian 1 (%)', data: p1Values, backgroundColor: '#94a3b8', borderRadius: 5 },
+                        { label: 'Penilaian 2 (%)', data: p2Values, backgroundColor: '#1d4ed8', borderRadius: 5 }
                     ]
                 },
                 options: {
@@ -1187,7 +992,6 @@
                 }
             });
 
-            // Jadual Perbandingan Bidang
             const tbody = document.getElementById('domain-summary-tbody');
             let htmlRows = '';
             let totalEligibleAll = 0;
@@ -1197,8 +1001,8 @@
                 const v2 = p2Values[i];
                 const delta = (v2 - v1).toFixed(2);
                 const naNote = d.naCount > 0 ? ` <span class="text-amber-600 font-semibold">(-${d.naCount} Sah)</span>` : '';
-                const deltaHtml = parseFloat(delta) > 0 
-                    ? `<span class="text-emerald-700 font-bold">+${delta}%</span>` 
+                const deltaHtml = parseFloat(delta) > 0
+                    ? `<span class="text-emerald-700 font-bold">+${delta}%</span>`
                     : (parseFloat(delta) < 0 ? `<span class="text-rose-600 font-bold">${delta}%</span>` : `<span class="text-slate-400">0.00%</span>`);
 
                 htmlRows += `
@@ -1230,10 +1034,9 @@
                 return jump > best.jump ? { name: d.shortName, jump } : best;
             }, { name: '-', jump: -999 });
 
-            document.getElementById('domain-highlight-note').innerHTML = 
+            document.getElementById('domain-highlight-note').innerHTML =
                 `<strong>Sorotan Lonjakan:</strong> ${highestJump.jump > 0 ? `${highestJump.name} mencatat peningkatan tertinggi sebanyak +${highestJump.jump.toFixed(2)}% (P1 ke P2).` : 'Tiada lonjakan positif direkodkan bagi tahun ini.'}`;
 
-            // Seksyen 4: Carta Bar Bertindih Mengikut Bidang
             if (chartInstances.stackedDomain) chartInstances.stackedDomain.destroy();
             chartInstances.stackedDomain = new Chart(document.getElementById('stackedDomainChart').getContext('2d'), {
                 type: 'bar',
@@ -1262,15 +1065,14 @@
                 }
             });
 
-            // Jadual Matriks Silang (Status vs Bidang)
             const matrixBody = document.getElementById('cross-matrix-tbody');
             let mHtml = '';
             let sumM = 0, sumC = 0, sumB = 0, sumT = 0, sumS = 0, sumAll = 0;
 
             domains.forEach(d => {
                 sumM += d.melebihi; sumC += d.mencapai; sumB += d.belum; sumT += d.tiada; sumS += d.sah; sumAll += d.total;
-                const cellBtn = (val, statusKey, colorCls) => val > 0 
-                    ? `<button onclick="filterByDomainAndStatus('${d.shortName}', '${statusKey}')" class="w-full py-1 rounded font-bold ${colorCls} hover:underline cursor-pointer transition">${val}</button>`
+                const cellBtn = (val, statusKey, colorCls) => val > 0
+                    ? `<button onclick="filterByDomainAndStatus('${d.shortName}', '${statusKey}')" class="w-full py-1 rounded font-bold ${colorCls} hover:underline cursor-pointer">${val}</button>`
                     : `<span class="text-slate-300">0</span>`;
 
                 mHtml += `
@@ -1300,7 +1102,6 @@
             matrixBody.innerHTML = mHtml;
         }
 
-        // Seksyen 3: Carta Donut Status Pencapaian
         function renderDonutChart(counts, total) {
             const labels = ['Melebihi Sasaran', 'Mencapai Sasaran', 'Belum Mencapai Sasaran', 'Data Belum Direkodkan', 'Perlu Pengesahan'];
             const colors = ['#10b981', '#2563eb', '#ef4444', '#94a3b8', '#f59e0b'];
@@ -1341,7 +1142,6 @@
             }).join('');
         }
 
-        // Seksyen Sorotan Tindakan Segera Pengurusan
         function renderManagementAlerts() {
             const belowItems = allRowsData.filter(r => r.statusCat === 'Belum Mencapai Sasaran');
             const unrecordedItems = allRowsData.filter(r => r.statusCat === 'Data Belum Direkodkan');
@@ -1350,10 +1150,10 @@
             document.getElementById('alert-below-list').innerHTML = belowItems.length === 0
                 ? '<p class="text-slate-500 italic py-4 text-center">Tiada KPI di bawah sasaran.</p>'
                 : belowItems.map(item => `
-                    <div class="bg-white p-2.5 rounded-lg border border-rose-100 flex justify-between items-start gap-2 shadow-sm">
+                    <div class="bg-white p-2.5 rounded-lg border border-rose-100 flex justify-between items-start gap-2">
                         <div>
                             <span class="font-bold text-rose-700">${item.noKpi}</span> — <span class="text-slate-700">${item.pernyataan}</span>
-                            <span class="ml-1.5 text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">${item.penyelaras}</span>
+                            <span class="ml-1.5 text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${item.penyelaras}</span>
                         </div>
                         <span class="font-extrabold text-rose-600 shrink-0">${item.effPct !== null ? item.effPct + '%' : '-'}</span>
                     </div>
@@ -1370,17 +1170,16 @@
             document.getElementById('alert-unrecorded-list').innerHTML = coordKeys.length === 0
                 ? '<p class="text-slate-500 italic py-4 text-center">Semua rekod KPI telah dikemas kini!</p>'
                 : coordKeys.map(coord => `
-                    <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="bg-white p-3 rounded-lg border border-slate-200">
                         <div class="flex justify-between items-center mb-1">
                             <span class="font-extrabold text-slate-800">${coord}</span>
-                            <span class="text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">${groupedCoord[coord].length} KPI</span>
+                            <span class="text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">${groupedCoord[coord].length} KPI</span>
                         </div>
                         <p class="text-[11px] text-slate-500 leading-relaxed">Senarai Kod: <span class="font-medium text-slate-700">${groupedCoord[coord].join(', ')}</span></p>
                     </div>
                 `).join('');
         }
 
-        // Seksyen 5: Analisis Prestasi Penyelaras KPI
         function renderCoordinatorAnalysis() {
             const coordMap = {};
             allRowsData.forEach(item => {
@@ -1411,7 +1210,6 @@
 
             document.getElementById('coord-total-count').innerText = coordList.length;
 
-            // Carta Purata Penyelaras
             if (chartInstances.coordAvg) chartInstances.coordAvg.destroy();
             chartInstances.coordAvg = new Chart(document.getElementById('coordinatorAvgChart').getContext('2d'), {
                 type: 'bar',
@@ -1421,7 +1219,7 @@
                         label: 'Purata Terkini / P2 (%)',
                         data: coordList.map(c => c.avgP2),
                         backgroundColor: coordList.map(c => c.avgP2 > 100 ? '#10b981' : (c.avgP2 === 100 ? '#2563eb' : (c.avgP2 > 0 ? '#ef4444' : '#94a3b8'))),
-                        borderRadius: 5
+                        borderRadius: 4
                     }]
                 },
                 options: {
@@ -1440,7 +1238,6 @@
                 }
             });
 
-            // Carta Bertindih Penyelaras
             if (chartInstances.coordStack) chartInstances.coordStack.destroy();
             chartInstances.coordStack = new Chart(document.getElementById('coordinatorStackChart').getContext('2d'), {
                 type: 'bar',
@@ -1466,7 +1263,6 @@
                 }
             });
 
-            // Jadual Penyelaras
             document.getElementById('coordinator-table-tbody').innerHTML = coordList.map((c, idx) => `
                 <tr class="hover:bg-slate-50">
                     <td class="p-2 text-center border border-slate-200">${idx + 1}</td>
@@ -1484,7 +1280,6 @@
             `).join('');
         }
 
-        // Isi Pilihan Dropdown Penapis
         function populateDropdownFilters() {
             const domainSel = document.getElementById('domainSelectFilter');
             const coordSel = document.getElementById('coordSelectFilter');
@@ -1495,7 +1290,6 @@
             coordSel.innerHTML = '<option value="ALL">Semua Penyelaras</option>' + coords.map(c => `<option value="${c}">${c}</option>`).join('');
         }
 
-        // Kawalan Penapis & Tab Status
         function setTabStatus(status) {
             activeStatusTab = status;
             document.querySelectorAll('.status-tab-btn').forEach(btn => {
@@ -1532,7 +1326,6 @@
             if (reapply) setTabStatus('ALL');
         }
 
-        // Tapis & Render Jadual Terperinci KPI
         function applyAllFilters() {
             const domainVal = document.getElementById('domainSelectFilter').value;
             const coordVal = document.getElementById('coordSelectFilter').value;
@@ -1542,7 +1335,7 @@
                 const matchStatus = activeStatusTab === 'ALL' || d.statusCat === activeStatusTab;
                 const matchDomain = domainVal === 'ALL' || d.bidang === domainVal;
                 const matchCoord = coordVal === 'ALL' || d.penyelaras === coordVal;
-                const matchSearch = !searchVal || 
+                const matchSearch = !searchVal ||
                     d.noKpi.toLowerCase().includes(searchVal) ||
                     d.pernyataan.toLowerCase().includes(searchVal) ||
                     d.penyelaras.toLowerCase().includes(searchVal);
@@ -1611,7 +1404,6 @@
             }).join('');
         }
 
-        // Pengurusan Cetakan & Staging PDF
         function openPrintModal() {
             document.getElementById('print-modal').classList.remove('hidden');
         }
@@ -1630,6 +1422,10 @@
             });
         }
 
+        function shouldShowHeaderOnPrint(checkedTargets) {
+            return Array.isArray(checkedTargets) && checkedTargets.length > 0;
+        }
+
         function chartToImgHtml(chartKey, maxH = 195) {
             const ch = chartInstances[chartKey];
             if (!ch) return '';
@@ -1642,7 +1438,7 @@
                 <div class="print-sheet-header">
                     <div>
                         <div style="font-size:13px;font-weight:800;letter-spacing:0.02em;">DASHBOARD PRESTASI PENCAPAIAN BLUEPRINT STRATEGIK KVSM</div>
-                        <div style="font-size:10px;color:#cbd5e1;">Pemantauan KPI (${currentYear}) &bull; ${subTitle}</div>
+                        <div style="font-size:10px;color:#cbd5e1;">Pemantauan KPI (${currentYear}) • ${subTitle}</div>
                     </div>
                     <div style="font-size:11px;font-weight:800;background:#2563eb;padding:4px 10px;border-radius:6px;">KVSM ${currentYear}</div>
                 </div>
@@ -1650,7 +1446,7 @@
         }
 
         function buildPrintableSectionsHtml(checkedTargets) {
-            const showHeader = checkedTargets.length > 0;
+            const showHeader = shouldShowHeaderOnPrint(checkedTargets);
             const blocks = [];
 
             if (checkedTargets.includes('sec-1')) {
@@ -1844,7 +1640,7 @@
             const cbs = [...document.querySelectorAll('.print-cb')];
             const checkedTargets = cbs.filter(cb => cb.checked).map(cb => cb.dataset.target);
             if (checkedTargets.length === 0) {
-                showToast('Sila pilih sekurang-kurangnya satu bahagian untuk dicetak.', 'error');
+                alert('Sila pilih sekurang-kurangnya satu bahagian untuk dicetak.');
                 return;
             }
             const stage = document.getElementById('print-staging-root');
@@ -1860,25 +1656,12 @@
 
         window.addEventListener('afterprint', cleanupPrintStaging);
 
-        // Pengenalpastian Kehadiran / Fokus Tab Untuk Segerak Automatik Serta-merta
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && autoSyncActive && dataMode === 'live') {
-                const now = Date.now();
-                if (!lastSyncTime || (now - lastSyncTime.getTime()) > 30000) {
-                    syncCurrentYear(false);
-                    resetCountdown();
-                }
-            }
-        });
-
-        // Inisialisasi Aplikasi Pada Window Load
         window.onload = () => {
             currentYear = '2026';
             dataMode = 'live';
             applyModeButtonStyles();
             document.getElementById('sec1-year-badge').innerText = '2026';
-            loadYearData('2026', true, false);
-            startAutoSyncTimer();
+            loadYearData('2026', true);
         };
     </script>
 </body>
