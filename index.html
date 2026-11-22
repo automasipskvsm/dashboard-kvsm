@@ -1833,15 +1833,48 @@
                 alert('Sila pilih sekurang-kurangnya satu bahagian untuk dicetak.');
                 return;
             }
-            const stage = document.getElementById('print-staging-root');
-            stage.innerHTML = buildPrintableSectionsHtml(checkedTargets);
-            document.body.classList.add('print-clean-mode');
-            closePrintModal();
 
-            setTimeout(() => {
-                window.print();
-                setTimeout(cleanupPrintStaging, 350);
-            }, 120);
+            // Google Sites menjalankan embed dalam iframe; window.print() dari iframe
+            // boleh disekat. Cetak melalui tetingkap baharu yang dibuka semasa klik.
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) {
+                alert('Tetingkap cetakan disekat. Benarkan pop-up untuk laman ini dan cuba lagi.');
+                return;
+            }
+
+            const printableHtml = buildPrintableSectionsHtml(checkedTargets);
+            const inlineStyles = [...document.querySelectorAll('style')]
+                .map(style => style.textContent).join('\n');
+            const stylesheetLinks = [...document.querySelectorAll('link[rel="stylesheet"]')]
+                .map(link => `<link rel="stylesheet" href="${link.href}">`).join('\n');
+
+            printWindow.document.open();
+            printWindow.document.write(`<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cetakan Dashboard Prestasi KVSM</title>
+${stylesheetLinks}
+<script src="https://cdn.tailwindcss.com"><\/script>
+<style>
+${inlineStyles}
+body { background:#fff !important; margin:0; padding:8mm; color:#0f172a; }
+#print-staging-root { display:block !important; width:100% !important; }
+@media screen { body { padding:12px; } }
+</style>
+</head>
+<body>
+<div id="print-staging-root">${printableHtml}</div>
+<script>
+window.addEventListener('load', function () {
+  setTimeout(function () { window.focus(); window.print(); }, 1000);
+});
+<\/script>
+</body>
+</html>`);
+            printWindow.document.close();
+            closePrintModal();
         }
 
         window.addEventListener('afterprint', cleanupPrintStaging);
