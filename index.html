@@ -91,18 +91,47 @@
             .print-table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 9.5px;
+                font-size: 8.5px;
+                line-height: 1.25;
             }
             .print-table thead {
                 display: table-header-group;
             }
-            .print-table th, .print-table td {
+            .print-table th {
+                background: #f1f5f9 !important;
+                color: #1e293b !important;
+                font-weight: 800;
                 border: 1px solid #cbd5e1;
-                padding: 4px 6px;
+                padding: 4px 4px;
+                font-size: 8px;
+            }
+            .print-table td {
+                border: 1px solid #cbd5e1;
+                padding: 3.5px 4px;
+                vertical-align: middle;
+                word-wrap: break-word;
             }
             .print-table tr {
                 break-inside: avoid;
                 page-break-inside: avoid;
+            }
+            .print-kpi-detail-table {
+                table-layout: fixed;
+                width: 100%;
+                font-size: 8px;
+                line-height: 1.22;
+            }
+            .print-kpi-detail-table th,
+            .print-kpi-detail-table td {
+                padding: 3px 3.5px;
+            }
+            .print-kpi-badge {
+                display: inline-block;
+                padding: 1.5px 5px;
+                border-radius: 999px;
+                font-size: 7.5px;
+                font-weight: 700;
+                white-space: nowrap;
             }
             .print-alert-item {
                 break-inside: avoid;
@@ -1606,14 +1635,105 @@
             }
 
             if (checkedTargets.includes('detailed-kpi-section')) {
-                const showingCnt = document.getElementById('showing-count').innerText;
-                const totalCnt = document.getElementById('total-records-count').innerText;
-                const kpiTableHtml = document.getElementById('kpi-table-body').parentElement.outerHTML;
+                const domainVal = document.getElementById('domainSelectFilter').value;
+                const coordVal = document.getElementById('coordSelectFilter').value;
+                const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+                const filteredForPrint = allRowsData.filter(d => {
+                    const matchStatus = activeStatusTab === 'ALL' || d.statusCat === activeStatusTab;
+                    const matchDomain = domainVal === 'ALL' || d.bidang === domainVal;
+                    const matchCoord = coordVal === 'ALL' || d.penyelaras === coordVal;
+                    const matchSearch = !searchVal ||
+                        d.noKpi.toLowerCase().includes(searchVal) ||
+                        d.pernyataan.toLowerCase().includes(searchVal) ||
+                        d.penyelaras.toLowerCase().includes(searchVal);
+                    return matchStatus && matchDomain && matchCoord && matchSearch;
+                });
+
+                const printBadgeColors = {
+                    'Melebihi Sasaran': 'background:#dcfce7;color:#166534;border:1px solid #86efac;',
+                    'Mencapai Sasaran': 'background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;',
+                    'Belum Mencapai Sasaran': 'background:#ffe4e6;color:#9f1239;border:1px solid #fda4af;',
+                    'Data Belum Direkodkan': 'background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;',
+                    'Perlu Pengesahan': 'background:#fef3c7;color:#92400e;border:1px solid #fcd34d;'
+                };
+                const printShortStatus = {
+                    'Melebihi Sasaran': '🟢 Melebihi',
+                    'Mencapai Sasaran': '🔵 Mencapai',
+                    'Belum Mencapai Sasaran': '🔴 Belum Capai',
+                    'Data Belum Direkodkan': '🔘 Belum Rekod',
+                    'Perlu Pengesahan': '🟡 Pengesahan'
+                };
+
+                const rowsHtml = filteredForPrint.map((d, idx) => {
+                    const isNA = d.statusCat === 'Perlu Pengesahan';
+                    let diffText = '-';
+                    let diffStyle = 'color:#64748b;';
+                    if (!isNA && d.diffPct !== null) {
+                        diffText = `${d.diffPct > 0 ? '+' : ''}${d.diffPct}%`;
+                        diffStyle = d.diffPct > 0 ? 'color:#15803d;font-weight:700;' : (d.diffPct < 0 ? 'color:#be123c;font-weight:700;' : 'color:#475569;');
+                    }
+                    const cleanPernyataan = String(d.pernyataan || '-').replace(/\r?\n/g, ' • ');
+                    const cleanCapai1 = String(d.capaiP1 || '-').replace(/\r?\n/g, ' ');
+                    const cleanCapai2 = String(d.capaiP2 || '-').replace(/\r?\n/g, ' ');
+                    return `
+                        <tr style="${idx % 2 === 1 ? 'background:#f8fafc;' : ''}">
+                            <td style="text-align:center;color:#475569;">${idx + 1}</td>
+                            <td style="font-weight:600;white-space:nowrap;">${d.bidang}</td>
+                            <td style="font-weight:700;white-space:nowrap;">${d.noKpi}</td>
+                            <td style="text-align:left;">${cleanPernyataan}</td>
+                            <td style="font-weight:600;">${d.penyelaras}</td>
+                            <td style="text-align:center;font-weight:600;">${d.sasaran || '-'}</td>
+                            <td style="text-align:center;">${cleanCapai1}</td>
+                            <td style="text-align:center;font-family:monospace;">${d.pctP1Display}</td>
+                            <td style="text-align:center;">${cleanCapai2}</td>
+                            <td style="text-align:center;font-family:monospace;font-weight:700;">${d.pctP2Display}</td>
+                            <td style="text-align:center;font-family:monospace;${diffStyle}">${diffText}</td>
+                            <td style="text-align:center;">
+                                <span class="print-kpi-badge" style="${printBadgeColors[d.statusCat] || ''}">${printShortStatus[d.statusCat] || d.statusCat}</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
                 const breakCls = parts.length > 0 ? ' print-page-break' : '';
                 parts.push(`
-                    <div class="print-card-flow${breakCls}">
-                        <div style="font-size:11.5px;font-weight:800;margin-bottom:6px;">6. Senarai Terperinci KPI (Memaparkan ${showingCnt} daripada ${totalCnt} KPI)</div>
-                        ${kpiTableHtml.replace('<table ', '<table class="print-table" ')}
+                    <div class="print-card-flow${breakCls}" style="padding:8px 9px;">
+                        <div style="font-size:11px;font-weight:800;margin-bottom:5px;">6. Senarai Terperinci KPI (Memaparkan ${filteredForPrint.length} daripada ${allRowsData.length} KPI)</div>
+                        <table class="print-table print-kpi-detail-table">
+                            <colgroup>
+                                <col style="width:3.5%;">
+                                <col style="width:7.5%;">
+                                <col style="width:8.5%;">
+                                <col style="width:27.5%;">
+                                <col style="width:9.5%;">
+                                <col style="width:5.5%;">
+                                <col style="width:6.5%;">
+                                <col style="width:5%;">
+                                <col style="width:6.5%;">
+                                <col style="width:5%;">
+                                <col style="width:5.5%;">
+                                <col style="width:9.5%;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th style="text-align:center;">BIL</th>
+                                    <th style="text-align:left;">BIDANG</th>
+                                    <th style="text-align:left;">KOD KPI</th>
+                                    <th style="text-align:left;">PERNYATAAN KPI</th>
+                                    <th style="text-align:left;">PENYELARAS</th>
+                                    <th style="text-align:center;">SASARAN</th>
+                                    <th style="text-align:center;">CAPAI P1</th>
+                                    <th style="text-align:center;">% P1</th>
+                                    <th style="text-align:center;">CAPAI P2</th>
+                                    <th style="text-align:center;">% P2</th>
+                                    <th style="text-align:center;">UBAH</th>
+                                    <th style="text-align:center;">STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
                     </div>
                 `);
             }
