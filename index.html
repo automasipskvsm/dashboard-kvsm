@@ -16,11 +16,16 @@
             display: none;
         }
         @media print {
-            @page { margin: 8mm 10mm; }
+            @page { size: A4 portrait; margin: 8mm 10mm; }
+            @page landscape-sheet { size: A4 landscape; margin: 7mm 8mm; }
             body {
                 background: #ffffff !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+            }
+            .print-landscape-block {
+                page: landscape-sheet;
+                width: 100%;
             }
             body.print-clean-mode > header,
             body.print-clean-mode > main,
@@ -231,10 +236,22 @@
                         <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600" data-target="sec-5" checked>
                         <span class="font-semibold text-slate-800">5. Analisis Prestasi &amp; Taburan Mengikut Penyelaras KPI</span>
                     </label>
-                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
-                        <input type="checkbox" class="print-cb w-4 h-4 accent-blue-600" data-target="detailed-kpi-section" checked>
-                        <span class="font-semibold text-slate-800">6. Senarai Terperinci KPI (Mengikut Penapis Aktif)</span>
-                    </label>
+                    <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="cb-sec6" class="print-cb w-4 h-4 accent-blue-600" data-target="detailed-kpi-section" checked>
+                            <span class="font-semibold text-slate-800">6. Senarai Terperinci KPI (Orientasi Landscape • Mengikut Penapis Aktif)</span>
+                        </label>
+                        <div class="pl-7 flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
+                            <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                                <input type="checkbox" id="cb-sec6-split-domain" class="w-3.5 h-3.5 accent-blue-600" checked>
+                                <span>Pecah jadual ikut Bidang (Bidang 1–4)</span>
+                            </label>
+                            <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                                <input type="checkbox" id="cb-sec6-pagebreak-domain" class="w-3.5 h-3.5 accent-blue-600">
+                                <span>Muka surat baharu setiap Bidang</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1466,7 +1483,7 @@
 
         function buildPrintSheetHeader(subTitle) {
             return `
-                <div class="print-sheet-header">
+                <div class="print-sheet-header" style="margin-bottom:8px;">
                     <div>
                         <div style="font-size:13px;font-weight:800;letter-spacing:0.02em;">DASHBOARD PRESTASI PENCAPAIAN BLUEPRINT STRATEGIK KVSM</div>
                         <div style="font-size:10px;color:#cbd5e1;">Pemantauan KPI (${currentYear}) • ${subTitle}</div>
@@ -1476,15 +1493,170 @@
             `;
         }
 
-        function buildPrintableSectionsHtml(checkedTargets) {
-            const showHeader = shouldShowHeaderOnPrint(checkedTargets);
-            const parts = [];
+        function buildDetailedKpiLandscapeHtml(includeMainHeader) {
+            const domainVal = document.getElementById('domainSelectFilter').value;
+            const coordVal = document.getElementById('coordSelectFilter').value;
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const splitByDomain = document.getElementById('cb-sec6-split-domain')?.checked ?? true;
+            const pageBreakPerDomain = document.getElementById('cb-sec6-pagebreak-domain')?.checked ?? false;
 
-            if (showHeader) {
-                parts.push(buildPrintSheetHeader('Laporan Cetakan Terpilih'));
+            const filteredForPrint = allRowsData.filter(d => {
+                const matchStatus = activeStatusTab === 'ALL' || d.statusCat === activeStatusTab;
+                const matchDomain = domainVal === 'ALL' || d.bidang === domainVal;
+                const matchCoord = coordVal === 'ALL' || d.penyelaras === coordVal;
+                const matchSearch = !searchVal ||
+                    d.noKpi.toLowerCase().includes(searchVal) ||
+                    d.pernyataan.toLowerCase().includes(searchVal) ||
+                    d.penyelaras.toLowerCase().includes(searchVal);
+                return matchStatus && matchDomain && matchCoord && matchSearch;
+            });
+
+            const printBadgeColors = {
+                'Melebihi Sasaran': 'background:#dcfce7;color:#166534;border:1px solid #86efac;',
+                'Mencapai Sasaran': 'background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;',
+                'Belum Mencapai Sasaran': 'background:#ffe4e6;color:#9f1239;border:1px solid #fda4af;',
+                'Data Belum Direkodkan': 'background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;',
+                'Perlu Pengesahan': 'background:#fef3c7;color:#92400e;border:1px solid #fcd34d;'
+            };
+            const printShortStatus = {
+                'Melebihi Sasaran': '🟢 Melebihi Sasaran',
+                'Mencapai Sasaran': '🔵 Mencapai Sasaran',
+                'Belum Mencapai Sasaran': '🔴 Belum Mencapai',
+                'Data Belum Direkodkan': '🔘 Belum Direkodkan',
+                'Perlu Pengesahan': '🟡 Perlu Pengesahan'
+            };
+
+            const renderTableForRows = (rowsSubset) => {
+                const rowsHtml = rowsSubset.map((d, idx) => {
+                    const isNA = d.statusCat === 'Perlu Pengesahan';
+                    let diffText = '-';
+                    let diffStyle = 'color:#64748b;';
+                    if (!isNA && d.diffPct !== null) {
+                        diffText = `${d.diffPct > 0 ? '+' : ''}${d.diffPct}%`;
+                        diffStyle = d.diffPct > 0 ? 'color:#15803d;font-weight:700;' : (d.diffPct < 0 ? 'color:#be123c;font-weight:700;' : 'color:#475569;');
+                    }
+                    const cleanPernyataan = String(d.pernyataan || '-').replace(/\r?\n/g, ' • ');
+                    const cleanCapai1 = String(d.capaiP1 || '-').replace(/\r?\n/g, ' ');
+                    const cleanCapai2 = String(d.capaiP2 || '-').replace(/\r?\n/g, ' ');
+                    return `
+                        <tr style="${idx % 2 === 1 ? 'background:#f8fafc;' : 'background:#ffffff;'}">
+                            <td style="text-align:center;color:#475569;font-weight:600;">${d.bil || (idx + 1)}</td>
+                            <td style="font-weight:700;white-space:nowrap;">${d.bidang}</td>
+                            <td style="font-weight:800;white-space:nowrap;color:#0f172a;">${d.noKpi}</td>
+                            <td style="text-align:left;color:#1e293b;">${cleanPernyataan}</td>
+                            <td style="font-weight:600;color:#334155;">${d.penyelaras}</td>
+                            <td style="text-align:center;font-weight:700;">${d.sasaran || '-'}</td>
+                            <td style="text-align:center;">${cleanCapai1}</td>
+                            <td style="text-align:center;font-family:monospace;">${d.pctP1Display}</td>
+                            <td style="text-align:center;">${cleanCapai2}</td>
+                            <td style="text-align:center;font-family:monospace;font-weight:800;color:#0f172a;">${d.pctP2Display}</td>
+                            <td style="text-align:center;font-family:monospace;${diffStyle}">${diffText}</td>
+                            <td style="text-align:center;">
+                                <span class="print-kpi-badge" style="${printBadgeColors[d.statusCat] || ''}">${printShortStatus[d.statusCat] || d.statusCat}</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                return `
+                    <table class="print-table print-kpi-detail-table" style="font-size:8.5px;line-height:1.25;">
+                        <colgroup>
+                            <col style="width:3%;">
+                            <col style="width:6.5%;">
+                            <col style="width:7.5%;">
+                            <col style="width:31%;">
+                            <col style="width:10%;">
+                            <col style="width:5%;">
+                            <col style="width:6%;">
+                            <col style="width:4.5%;">
+                            <col style="width:6%;">
+                            <col style="width:4.5%;">
+                            <col style="width:5%;">
+                            <col style="width:11%;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th style="text-align:center;">BIL</th>
+                                <th style="text-align:left;">BIDANG</th>
+                                <th style="text-align:left;">KOD KPI</th>
+                                <th style="text-align:left;">PERNYATAAN KPI</th>
+                                <th style="text-align:left;">PENYELARAS</th>
+                                <th style="text-align:center;">SASARAN</th>
+                                <th style="text-align:center;">CAPAI P1</th>
+                                <th style="text-align:center;">% P1</th>
+                                <th style="text-align:center;">CAPAI P2</th>
+                                <th style="text-align:center;">% P2</th>
+                                <th style="text-align:center;">UBAH</th>
+                                <th style="text-align:center;">STATUS PENCAPAIAN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                `;
+            };
+
+            let bodyContent = '';
+            if (filteredForPrint.length === 0) {
+                bodyContent = `<div style="padding:12px;text-align:center;color:#64748b;font-size:10px;border:1px solid #cbd5e1;border-radius:8px;">Tiada rekod KPI sepadan dengan penapis aktif.</div>`;
+            } else if (splitByDomain && domainVal === 'ALL') {
+                const domainKeys = ['BIDANG 1', 'BIDANG 2', 'BIDANG 3', 'BIDANG 4'];
+                const extraDomains = [...new Set(filteredForPrint.map(r => r.bidang))].filter(b => !domainKeys.includes(b));
+                const orderedDomains = [...domainKeys, ...extraDomains];
+
+                const blocks = [];
+                orderedDomains.forEach(domKey => {
+                    const subset = filteredForPrint.filter(r => r.bidang === domKey);
+                    if (subset.length === 0) return;
+                    const fullTitle = DOMAIN_FULL_NAMES[domKey] || domKey;
+                    const brkClass = (pageBreakPerDomain && blocks.length > 0) ? ' print-page-break' : '';
+                    blocks.push(`
+                        <div class="${brkClass}" style="margin-bottom:10px;">
+                            <div style="background:#e2e8f0;color:#0f172a;font-size:9.5px;font-weight:800;padding:4px 8px;border:1px solid #cbd5e1;border-bottom:none;border-radius:6px 6px 0 0;display:flex;justify-content:space-between;align-items:center;break-after:avoid;page-break-after:avoid;">
+                                <span>${fullTitle.toUpperCase()}</span>
+                                <span>${subset.length} KPI</span>
+                            </div>
+                            ${renderTableForRows(subset)}
+                        </div>
+                    `);
+                });
+                bodyContent = blocks.join('');
+            } else {
+                bodyContent = renderTableForRows(filteredForPrint);
             }
 
-            if (checkedTargets.includes('sec-1')) {
+            const filterNotes = [];
+            if (activeStatusTab !== 'ALL') filterNotes.push(`Status: ${activeStatusTab}`);
+            if (domainVal !== 'ALL') filterNotes.push(`Bidang: ${domainVal}`);
+            if (coordVal !== 'ALL') filterNotes.push(`Penyelaras: ${coordVal}`);
+            const filterSummary = filterNotes.length > 0 ? ` • Penapis: ${filterNotes.join(', ')}` : '';
+
+            return `
+                <div class="print-landscape-block">
+                    ${includeMainHeader ? buildPrintSheetHeader('Senarai Terperinci KPI (Landscape)') : ''}
+                    <div style="border:1px solid #cbd5e1;border-radius:10px;padding:8px 10px;background:#ffffff;">
+                        <div style="font-size:11px;font-weight:800;margin-bottom:6px;color:#0f172a;break-after:avoid;page-break-after:avoid;">
+                            6. Senarai Terperinci KPI (Memaparkan ${filteredForPrint.length} daripada ${allRowsData.length} KPI${filterSummary})
+                        </div>
+                        ${bodyContent}
+                    </div>
+                </div>
+            `;
+        }
+
+        function buildPrintableSectionsHtml(checkedTargets) {
+            const showHeader = shouldShowHeaderOnPrint(checkedTargets);
+            const hasSec6 = checkedTargets.includes('detailed-kpi-section');
+            const otherTargets = checkedTargets.filter(t => t !== 'detailed-kpi-section');
+            const portraitParts = [];
+
+            // Jika ada seksyen Portrait dipilih, letakkan header di atas seksyen Portrait pertama supaya tidak terpisah
+            if (showHeader && otherTargets.length > 0) {
+                portraitParts.push(buildPrintSheetHeader('Laporan Cetakan Terpilih'));
+            }
+
+            if (otherTargets.includes('sec-1')) {
                 const overallPct = document.getElementById('overall-avg-pct').innerText;
                 const targetRate = document.getElementById('overall-target-rate').innerText;
                 const avgP1 = document.getElementById('avg-p1-pct').innerText;
@@ -1497,7 +1669,7 @@
                     ['🔘 Belum Direkod', document.getElementById('cnt-tiada').innerText, document.getElementById('pct-tiada').innerText],
                     ['🟡 Perlu Pengesahan', document.getElementById('cnt-sah').innerText, document.getElementById('pct-sah').innerText]
                 ];
-                parts.push(`
+                portraitParts.push(`
                     <div class="print-card">
                         <div style="font-size:12px;font-weight:800;margin-bottom:8px;text-transform:uppercase;">1. Ringkasan Eksekutif &amp; Status Pencapaian Keseluruhan (${allRowsData.length} KPI)</div>
                         <div class="print-grid-2" style="margin-bottom:8px;">
@@ -1536,11 +1708,11 @@
                 `);
             }
 
-            if (checkedTargets.includes('sec-2-3')) {
+            if (otherTargets.includes('sec-2-3')) {
                 const domainTableHtml = document.getElementById('domain-summary-tbody').parentElement.outerHTML;
                 const highlightNote = document.getElementById('domain-highlight-note').innerText;
                 const donutLegend = document.getElementById('donut-legend-list').innerHTML;
-                parts.push(`
+                portraitParts.push(`
                     <div class="print-card-flow">
                         <div class="print-grid-2" style="margin-bottom:6px;">
                             <div style="border:1px solid #e2e8f0;border-radius:8px;padding:8px;">
@@ -1566,9 +1738,9 @@
                 `);
             }
 
-            if (checkedTargets.includes('sec-4')) {
+            if (otherTargets.includes('sec-4')) {
                 const matrixTableHtml = document.getElementById('cross-matrix-tbody').parentElement.outerHTML;
-                parts.push(`
+                portraitParts.push(`
                     <div class="print-card-flow">
                         <div style="font-size:11.5px;font-weight:800;margin-bottom:6px;">4. Pecahan Bilangan KPI Mengikut Status &amp; Bidang</div>
                         ${chartToImgHtml('stackedDomain', 135)}
@@ -1577,7 +1749,7 @@
                 `);
             }
 
-            if (checkedTargets.includes('sec-alerts')) {
+            if (otherTargets.includes('sec-alerts')) {
                 const belowCnt = document.getElementById('alert-below-count').innerText;
                 const belowItems = [...document.querySelectorAll('#alert-below-list > div')];
                 const unrecCnt = document.getElementById('alert-unrecorded-count').innerText;
@@ -1597,7 +1769,7 @@
                         return `<div class="print-alert-item" style="background:#ffffff;border:1px solid #cbd5e1;border-radius:6px;padding:5px 7px;font-size:9.5px;color:#1e293b;">${txt}</div>`;
                     }).join('');
 
-                parts.push(`
+                portraitParts.push(`
                     <div class="print-card-flow">
                         <div style="font-size:11.5px;font-weight:800;margin-bottom:6px;">Sorotan Tindakan Segera Pengurusan</div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;">
@@ -1614,9 +1786,9 @@
                 `);
             }
 
-            if (checkedTargets.includes('sec-5')) {
+            if (otherTargets.includes('sec-5')) {
                 const coordTableHtml = document.getElementById('coordinator-table-tbody').parentElement.outerHTML;
-                parts.push(`
+                portraitParts.push(`
                     <div class="print-card-flow">
                         <div style="font-size:11.5px;font-weight:800;margin-bottom:6px;">5. Analisis Prestasi &amp; Taburan Status Mengikut Penyelaras KPI</div>
                         <div class="print-grid-2">
@@ -1634,111 +1806,18 @@
                 `);
             }
 
-            if (checkedTargets.includes('detailed-kpi-section')) {
-                const domainVal = document.getElementById('domainSelectFilter').value;
-                const coordVal = document.getElementById('coordSelectFilter').value;
-                const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
-                const filteredForPrint = allRowsData.filter(d => {
-                    const matchStatus = activeStatusTab === 'ALL' || d.statusCat === activeStatusTab;
-                    const matchDomain = domainVal === 'ALL' || d.bidang === domainVal;
-                    const matchCoord = coordVal === 'ALL' || d.penyelaras === coordVal;
-                    const matchSearch = !searchVal ||
-                        d.noKpi.toLowerCase().includes(searchVal) ||
-                        d.pernyataan.toLowerCase().includes(searchVal) ||
-                        d.penyelaras.toLowerCase().includes(searchVal);
-                    return matchStatus && matchDomain && matchCoord && matchSearch;
-                });
-
-                const printBadgeColors = {
-                    'Melebihi Sasaran': 'background:#dcfce7;color:#166534;border:1px solid #86efac;',
-                    'Mencapai Sasaran': 'background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;',
-                    'Belum Mencapai Sasaran': 'background:#ffe4e6;color:#9f1239;border:1px solid #fda4af;',
-                    'Data Belum Direkodkan': 'background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;',
-                    'Perlu Pengesahan': 'background:#fef3c7;color:#92400e;border:1px solid #fcd34d;'
-                };
-                const printShortStatus = {
-                    'Melebihi Sasaran': '🟢 Melebihi',
-                    'Mencapai Sasaran': '🔵 Mencapai',
-                    'Belum Mencapai Sasaran': '🔴 Belum Capai',
-                    'Data Belum Direkodkan': '🔘 Belum Rekod',
-                    'Perlu Pengesahan': '🟡 Pengesahan'
-                };
-
-                const rowsHtml = filteredForPrint.map((d, idx) => {
-                    const isNA = d.statusCat === 'Perlu Pengesahan';
-                    let diffText = '-';
-                    let diffStyle = 'color:#64748b;';
-                    if (!isNA && d.diffPct !== null) {
-                        diffText = `${d.diffPct > 0 ? '+' : ''}${d.diffPct}%`;
-                        diffStyle = d.diffPct > 0 ? 'color:#15803d;font-weight:700;' : (d.diffPct < 0 ? 'color:#be123c;font-weight:700;' : 'color:#475569;');
-                    }
-                    const cleanPernyataan = String(d.pernyataan || '-').replace(/\r?\n/g, ' • ');
-                    const cleanCapai1 = String(d.capaiP1 || '-').replace(/\r?\n/g, ' ');
-                    const cleanCapai2 = String(d.capaiP2 || '-').replace(/\r?\n/g, ' ');
-                    return `
-                        <tr style="${idx % 2 === 1 ? 'background:#f8fafc;' : ''}">
-                            <td style="text-align:center;color:#475569;">${idx + 1}</td>
-                            <td style="font-weight:600;white-space:nowrap;">${d.bidang}</td>
-                            <td style="font-weight:700;white-space:nowrap;">${d.noKpi}</td>
-                            <td style="text-align:left;">${cleanPernyataan}</td>
-                            <td style="font-weight:600;">${d.penyelaras}</td>
-                            <td style="text-align:center;font-weight:600;">${d.sasaran || '-'}</td>
-                            <td style="text-align:center;">${cleanCapai1}</td>
-                            <td style="text-align:center;font-family:monospace;">${d.pctP1Display}</td>
-                            <td style="text-align:center;">${cleanCapai2}</td>
-                            <td style="text-align:center;font-family:monospace;font-weight:700;">${d.pctP2Display}</td>
-                            <td style="text-align:center;font-family:monospace;${diffStyle}">${diffText}</td>
-                            <td style="text-align:center;">
-                                <span class="print-kpi-badge" style="${printBadgeColors[d.statusCat] || ''}">${printShortStatus[d.statusCat] || d.statusCat}</span>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-
-                const breakCls = parts.length > 0 ? ' print-page-break' : '';
-                parts.push(`
-                    <div class="print-card-flow${breakCls}" style="padding:8px 9px;">
-                        <div style="font-size:11px;font-weight:800;margin-bottom:5px;">6. Senarai Terperinci KPI (Memaparkan ${filteredForPrint.length} daripada ${allRowsData.length} KPI)</div>
-                        <table class="print-table print-kpi-detail-table">
-                            <colgroup>
-                                <col style="width:3.5%;">
-                                <col style="width:7.5%;">
-                                <col style="width:8.5%;">
-                                <col style="width:27.5%;">
-                                <col style="width:9.5%;">
-                                <col style="width:5.5%;">
-                                <col style="width:6.5%;">
-                                <col style="width:5%;">
-                                <col style="width:6.5%;">
-                                <col style="width:5%;">
-                                <col style="width:5.5%;">
-                                <col style="width:9.5%;">
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th style="text-align:center;">BIL</th>
-                                    <th style="text-align:left;">BIDANG</th>
-                                    <th style="text-align:left;">KOD KPI</th>
-                                    <th style="text-align:left;">PERNYATAAN KPI</th>
-                                    <th style="text-align:left;">PENYELARAS</th>
-                                    <th style="text-align:center;">SASARAN</th>
-                                    <th style="text-align:center;">CAPAI P1</th>
-                                    <th style="text-align:center;">% P1</th>
-                                    <th style="text-align:center;">CAPAI P2</th>
-                                    <th style="text-align:center;">% P2</th>
-                                    <th style="text-align:center;">UBAH</th>
-                                    <th style="text-align:center;">STATUS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${rowsHtml}
-                            </tbody>
-                        </table>
-                    </div>
-                `);
+            const finalBlocks = [];
+            if (portraitParts.length > 0) {
+                finalBlocks.push(portraitParts.join(''));
+            }
+            if (hasSec6) {
+                // Jika Seksyen 6 dicetak bersendirian, masukkan header terus dalam blok Landscape supaya tidak terpisah ke muka surat kosong!
+                // Jika dicetak bersama seksyen lain, named page 'landscape-sheet' akan memulakan halaman Landscape baharu tanpa ruang kosong berasingan.
+                const includeHeaderInsideLandscape = showHeader && otherTargets.length === 0;
+                finalBlocks.push(buildDetailedKpiLandscapeHtml(includeHeaderInsideLandscape));
             }
 
-            return `<div class="print-sheet">${parts.join('')}</div>`;
+            return `<div class="print-sheet">${finalBlocks.join('')}</div>`;
         }
 
         function cleanupPrintStaging() {
